@@ -51,7 +51,7 @@ task api(type: Javadoc) {
 	}
 }
 
-dokka {
+/*dokka {
 	dependsOn {
 		tasks.getByName("api")
 	}
@@ -78,9 +78,9 @@ dokka {
 	externalDocumentationLink {
 		url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
 	}
-}
+}*/
 
-asciidoctor {
+/*asciidoctor {
 	sources {
 		include '*.adoc'
 	}
@@ -108,7 +108,7 @@ asciidoctor {
 			stylesheet: 'main.css',
 			'spring-version': project.version
 
-}
+}*/
 
 task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	group = "Distribution"
@@ -138,25 +138,53 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	}
 }
 
+//task schemaZip(type: Zip) {
+//	group = "Distribution"
+//	baseName = "spring-framework"
+//	classifier = "schema"
+//	description = "Builds -${classifier} archive containing all " +
+//			"XSDs for deployment at https://springframework.org/schema."
+//	duplicatesStrategy 'exclude'
+//	moduleProjects.each { subproject ->
+//		def Properties schemas = new Properties();
+//
+//		subproject.sourceSets.main.resources.find {
+//			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
+//		}?.withInputStream { schemas.load(it) }
+//
+//		for (def key : schemas.keySet()) {
+//			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
+//			assert shortName != key
+//			File xsdFile = subproject.sourceSets.main.resources.find {
+//				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
+//			}
+//			assert xsdFile != null
+//			into (shortName) {
+//				from xsdFile.path
+//			}
+//		}
+//	}
+//}
+
 task schemaZip(type: Zip) {
 	group = "Distribution"
 	baseName = "spring-framework"
 	classifier = "schema"
 	description = "Builds -${classifier} archive containing all " +
-			"XSDs for deployment at https://springframework.org/schema."
+			"XSDs for deployment at http://springframework.org/schema."
 	duplicatesStrategy 'exclude'
 	moduleProjects.each { subproject ->
 		def Properties schemas = new Properties();
 
 		subproject.sourceSets.main.resources.find {
-			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
-		}?.withInputStream { schemas.load(it) }
+				it.path.endsWith("META-INF\\spring.schemas")
+			}?.withInputStream { schemas.load(it) }
 
 		for (def key : schemas.keySet()) {
 			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
 			assert shortName != key
 			File xsdFile = subproject.sourceSets.main.resources.find {
-				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
+				it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\'))
 			}
 			assert xsdFile != null
 			into (shortName) {
