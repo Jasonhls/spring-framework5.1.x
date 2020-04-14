@@ -60,7 +60,13 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
+		//1.创建我们的根容器AnnotationConfigWebApplicationContext，此时根容器是空容器对象，没有组件
+		//2.new 了ContextLoaderListener
+		//3.把我们的根配置类保存到根容器中
+		//4.把ContextLoaderListener注册到servletContext
 		super.onStartup(servletContext);
+		//创建我们的子容器AnnotationConfigWebApplicationContext，此时子容器也是空容器对象
+		//创建DispatcherServlet
 		registerDispatcherServlet(servletContext);
 	}
 
@@ -75,23 +81,38 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * {@link #createDispatcherServlet(WebApplicationContext)}.
 	 * @param servletContext the context to register the servlet against
 	 */
+	/**
+	 * 创建子容器，创建DispatcherServlet
+	 * @param servletContext
+	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
+		//获取DispatcherServlet的名称
 		String servletName = getServletName();
 		Assert.hasLength(servletName, "getServletName() must not return null or empty");
 
+		//创建WebApplicationContext对象，即子容器对象AnnotationConfigWebApplicationContext
 		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.notNull(servletAppContext, "createServletApplicationContext() must not return null");
 
+		/**
+		 * 创建DispatcherServlet对象，tomcat会对DispatcherServlet进行生命周期管理
+		 */
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
+		/**
+		 * 获取ServletApplicationContextInitializers对象，然后把ServletApplicationContextInitializers
+		 * 注册到dispatcherServlet
+		 */
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
 
+		//注册我们的dispatcherServlet
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		if (registration == null) {
 			throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
 					"Check if there is another servlet registered under the same name.");
 		}
 
+		//设置我们dispatcher属性
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
 		registration.setAsyncSupported(isAsyncSupported());

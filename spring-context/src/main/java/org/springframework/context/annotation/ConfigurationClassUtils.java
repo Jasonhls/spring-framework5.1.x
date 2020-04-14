@@ -90,6 +90,8 @@ abstract class ConfigurationClassUtils {
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			//这里的metadata其实就是StandardAnnotationMetadata，
+			//在程序入口方法中new AnnotationConfigApplicationContext(AppConfig.class)构造函数中创建的
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
 		}
 		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
@@ -101,6 +103,7 @@ abstract class ConfigurationClassUtils {
 		else {
 			try {
 				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
+				//这里得到的annotationMetadata其实是AnnotationMetadataReadingVisitor
 				metadata = metadataReader.getAnnotationMetadata();
 			}
 			catch (IOException ex) {
@@ -112,9 +115,11 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+		//如果类上含有@Configuration注解的话
 		if (isFullConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+		//如果类上含有@Component，@ComponentScan，@Import，@ImportResource，或方法上有@Bean注解的话
 		else if (isLiteConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
@@ -123,6 +128,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// It's a full or lite configuration candidate... Let's determine the order value, if any.
+		//设置beanDefinition的ORDER_ATTRIBUTE属性值
 		Integer order = getOrder(metadata);
 		if (order != null) {
 			beanDef.setAttribute(ORDER_ATTRIBUTE, order);

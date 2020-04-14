@@ -243,6 +243,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		//首先尝试从单例缓存中获取，没有后面会走创建bean实例的逻辑createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
+		//处理循环依赖的问题，比如A->B,B->A
+		//1.getBean(A)，获取到A的实例，此时还未进行注入
+		//2.开始注入，发现B属性，开始getBean(B)，获取到B的实例
+		//3.开始B的注入，发现A属性，获取到还未注入完成的A，即处于isSingletonCurrentlyInCreation的A
+		//4.完成B的注入，getBean(B)完成，然后A的注入也完成，也就是在构建单例的时候，
+		//会将还未完成注入的A提前暴露，便于B完成注入
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -291,6 +298,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			try {
+				//获取RootBeanDefinition
 				final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
@@ -315,8 +323,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Create bean instance.
 				if (mbd.isSingleton()) {
+					//getSinleton方法中，会把beanName添加到singletonsCurrentlyInCreation中
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							//创建单例bean实例
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
@@ -1311,6 +1321,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Cache the merged bean definition for the time being
 				// (it might still get re-merged later on in order to pick up metadata changes)
+				//第一次创建的bean实例需要先获取RootBeanDefinition，最先开始是直接new RootBeanDefinition(bd)方式
+				//获取的，获取的RootBeanDefinition会缓存到mergedBeanDefinitions中
 				if (containingBd == null && isCacheBeanMetadata()) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}

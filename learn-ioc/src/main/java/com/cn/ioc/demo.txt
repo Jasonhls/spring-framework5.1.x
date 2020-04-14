@@ -1,0 +1,117 @@
+一、阅读spring文档方法：
+浏览器输入spring.io进入官网
+点击projects，选择Spring Framework,
+点击learn，然后选择要阅读的spring的版本，点击后面的Reference Doc.，
+进入到文档页面，就可以开始阅读spring文档了。
+二、循环依赖原理分析：
+例子：
+@Component
+public class Fox {
+
+	@Autowired
+	private User user;    //完整的User
+
+	public Fox() {
+		System.out.println("调用Fox()无参构造器");
+	}
+
+	public Fox(User user){
+		System.out.println(user);
+		System.out.println("调用Fox(User user)有参构造器");
+	}
+}
+@Component
+public class User {
+
+	@Autowired
+	private Fox fox;   /** fox 早期没有填充属性的bean */
+
+	public User(){
+		System.out.println("调用User()无参构造器");
+	}
+
+	public User(Fox fox){
+		System.out.println(fox);
+		System.out.println("调用User(Fox fox)构造方法");
+	}
+}
+debug步骤：
+1.AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+2.执行AbstractApplicationContext类中refresh()方法中的finishBeanFactoryInitialization(beanFactory)代码
+3.执行AbstractApplicationContext类中finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory)方法中的beanFactory.preInstantiateSingletons();
+4.执行defaultListableBeanFactory中的preInstantiateSingletons()方法中的getBean(name)，
+	该方法主要是创建实例bean，根据顺序，会先创建fox，再创建user
+5.执行AbstractBeanFactory类中的doGetBean方法
+ 开始根据beanName，fox，先去单例缓存中寻找，第一次找不到
+ 就会去创建，创建逻辑在如下代码中，
+ sharedInstance = getSingleton(beanName, () -> {
+						try {
+							//创建单例bean实例
+							return createBean(beanName, mbd, args);
+						}
+						catch (BeansException ex) {
+							// Explicitly remove instance from singleton cache: It might have been put there
+							// eagerly by the creation process, to allow for circular reference resolution.
+							// Also remove any beans that received a temporary reference to the bean.
+							destroySingleton(beanName);
+							throw ex;
+						}
+					});
+6.执行AbstractAutowireCapableBeanFactory的createBean方法
+7.执行该方法中的Object beanInstance = doCreateBean(beanName, mbdToUse, args)代码
+8.执行AbstractAutowireCapableBeanFactory的doCreateBean方法创建bean实例
+9.执行AbstractAutowireCapableBeanFactory的createBeanInstance方法创建bean实例，会走默认的无参构造器创建bean实例
+	createBeanInstance是创建bean实例的核心逻辑
+10.返回到doCreateBean方法中的addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean))这行代码，
+该行代码中会创建singletonFactory(即exposedObject)，然后将singletonFactory缓存放到singletonFactories中
+11.返回到doCreateBean方法中的populateBean(beanName, mbd, instanceWrapper)这行代码，该行代码主要是填充fox的属性
+填充属性的时候发现依赖了User，就会去根据user这个beanName去获取user的实例，具体代码如下：
+AbstractAutowireCapableBeanFactory#populateBean方法
+	PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName)
+-->InstantiationAwareBeanPostProcessor#postProcessProperties方法
+-->InstantiationAwareBeanPostProcessor子类AutowiredAnnotationBeanPostProcessor#postProcessProperties方法
+	metadata.inject(bean, beanName, pvs)
+-->InjectionMetadata#inject方法
+	element.inject(target, beanName, pvs)，
+-->InjectionMetadata#inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
+-->InjectionMetadata子类AutowiredAnnotationBeanPostProcessor类的内部类AutowiredFieldElement#inject方法
+	value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter)
+-->AutowireCapableBeanFactory#resolveDependency
+-->AutowireCapableBeanFactory子类DefaultListableBeanFactory#resolveDependency
+	result = doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter)
+-->DefaultListableBeanFactory#doResolveDependency
+	instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
+-->DependencyDescriptor#resolveCandidate
+	beanFactory.getBean(beanName)，
+	这时候的beanName为user，然后根据这个方法去寻找user的实例对象
+12.寻找user实例，同理如果没有user实例对象就去创建，同理在doCreateBean中，会把user的singletonFactory放到singletonFactories中，
+接着往下会执行populateBean(beanName, mbd, instanceWrapper)，填充user实例对象的属性，发现依赖了fox，会根据步骤11中的
+逻辑去执行beanFactory.getBean("fox")寻找fox实例，因为之前在步骤10中已经将fox的exposedObject放到了singletonFactories中，
+所以执行AbstractBeanFactory#doGetBean方法
+	Object sharedInstance = getSingleton(beanName)
+	会得到fox实例，完成了user实例对象的属性fox的填充，
+	然后回到创建user实例中下面代码部分
+	if (mbd.isSingleton()) {
+					sharedInstance = getSingleton(beanName, () -> {
+						try {
+							//创建单例bean实例
+							return createBean(beanName, mbd, args);
+						}
+						catch (BeansException ex) {
+							// Explicitly remove instance from singleton cache: It might have been put there
+							// eagerly by the creation process, to allow for circular reference resolution.
+							// Also remove any beans that received a temporary reference to the bean.
+							destroySingleton(beanName);
+							throw ex;
+						}
+					});
+					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
+				}
+	getSingleton方法中会把单例user实例放到singletonObjects中，并从singletonFactories中移除，完成了user的实例的创建
+13.获取了user实例(已经完成属性填充的实例)，就返回到11步骤中，开始fox实例对象中属性user的填充工作，填充完成
+14.回到步骤5中的getSingleton方法中，
+DefaultSingletonBeanRegistry#getSingleton方法
+	addSingleton(beanName, singletonObject)
+	把单例bean实例放到singletonObjects中，并从singletonFactories中移除，完成了fox的实例的创建
+15.回到步骤4中，创建完了fox实例，根据顺序再创建user实例，发现单例缓存中有，直接返回，这样fox和user实例都创建完成，
+并放到了DefaultListableBeanFactory的单例map中了，也就全部注册到了spring中了。

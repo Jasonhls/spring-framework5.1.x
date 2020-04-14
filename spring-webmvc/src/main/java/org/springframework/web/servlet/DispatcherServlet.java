@@ -500,13 +500,20 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
 	 */
 	protected void initStrategies(ApplicationContext context) {
+		//初始化我们web上下文对象的，用于文件上传下载的解析器对象
 		initMultipartResolver(context);
+		//初始化我们web上下文对象用于处理国际化资源的
 		initLocaleResolver(context);
+		//主题解析器对象初始化
 		initThemeResolver(context);
+		//初始化我们的HandlerMapping
 		initHandlerMappings(context);
+		//实例化我们的HandlerAdapters
 		initHandlerAdapters(context);
+		//实例化我们处理器异常解析器对象
 		initHandlerExceptionResolvers(context);
 		initRequestToViewNameTranslator(context);
+		//给DispatcherServlet的ViewResolvers处理器
 		initViewResolvers(context);
 		initFlashMapManager(context);
 	}
@@ -595,6 +602,16 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+			/**
+			 * 从Spring web容器中找出所有的HanlderMapping接口的实现类的Bean
+			 * 由于我们在WebAppConfig中配置了@EnableWebMvc
+			 * 导入了DelegatingWebMvcConfiguration的父类是一个配置类，配置了
+			 * 1.requestMappingHandlerMapping 用于处理我们的@RequestMapping
+			 * 2.viewControllerHandlerMapping 用于处理我们的view到页面的转发,不会经过我们的控制器对象
+			 * 3.beanNameHandlerMapping(BeanNameUrlHnalderMapping) 基于BeanName映射请求
+			 * 4.resourceHandlerMapping 资源映射
+			 * 5.defaultServletHandlerMapping 处理静态资源文件
+			 */
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
@@ -1009,10 +1026,20 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
+				/**
+				 * 检查request对象 判断我们的请求是不是文件上传的请求
+				 */
 				processedRequest = checkMultipart(request);
+				/**
+				 * 判断是不是文件上的请求 若是的话返回的processedRequest是MultipartHttpServletRequest
+				 * 那么显然和原始的request不是同一个对象 那么multipartRequestParsed为true(表示文件上传下载)
+				 */
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
+				/**
+				 * 从请求中推断出HandlerExecuteChain 处理器执行链对象
+				 */
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1020,6 +1047,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
+				/**
+				 * 根据Handler选择HandlerAdapter对象，默认是RequestMappingHandlerAdapter
+				 */
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
@@ -1037,6 +1067,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Actually invoke the handler.
+				/**
+				 * 通过适配器真正调用目标方法
+				 * RequestMappingHandlerAdapter#handleInternal
+				 * AbstractHandlerMethodAdapter#handle(HttpServletRequest request, HttpServletResponse response, Object handler)
+				 */
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
@@ -1044,6 +1079,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				applyDefaultViewName(processedRequest, mv);
+				/**
+				 * 触发我们拦截器链的post方法
+				 */
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1054,12 +1092,21 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			/**
+			 * 处理目标方法返回的结果,主要就是渲染视图
+			 */
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
+			/**
+			 * 抛出异常:处理我们拦截器的afterCompletion方法
+			 */
 			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		}
 		catch (Throwable err) {
+			/**
+			 * 抛出异常:处理我们拦截器的afterCompletion方法
+			 */
 			triggerAfterCompletion(processedRequest, response, mappedHandler,
 					new NestedServletException("Handler processing failed", err));
 		}
@@ -1072,6 +1119,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			else {
 				// Clean up any resources used by a multipart request.
+				/**
+				 * 清理文件上传时生成的临时文件
+				 */
 				if (multipartRequestParsed) {
 					cleanupMultipart(processedRequest);
 				}
@@ -1228,14 +1278,25 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		/**
+		 * 判断spring web容器中配置的所有的handlerMapping集合对象
+		 * initHandlerMappings()方法会初始化handlerMappings集合
+		 */
 		if (this.handlerMappings != null) {
 			for (HandlerMapping mapping : this.handlerMappings) {
+				/**
+				 * 循环调用获取HandlerExecuteChain,但是也会调用我们所有的HandlerMapping的父类的
+				 * AbstractHandlerMapping#getHandler(request)方法
+				 */
 				HandlerExecutionChain handler = mapping.getHandler(request);
 				if (handler != null) {
 					return handler;
 				}
 			}
 		}
+		/**
+		 * 遍历HandlerMappings 对象还没有获取到对应的HandlerExecuteChain,那么就认为该次请求无法匹配
+		 */
 		return null;
 	}
 

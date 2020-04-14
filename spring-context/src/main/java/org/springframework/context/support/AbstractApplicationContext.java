@@ -515,40 +515,54 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
+			//1.准备刷新上下文环境
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			//2.获取告诉子类初始化Bean工厂
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
+			//3.对bean工厂进行填充属性
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				//4.留个子类去实现该接口
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
+				//5.调用bean工厂的后置处理器
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				//6.调用bean的后置处理器
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
+				//7.初始化国际化资源处理器
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				//8.创建事件多播器
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				//这个方法同样是留个子类实现的 springboot也是从这个方法进行启动Tomcat的
+				//9.重新刷新容器，留给子类实现的
 				onRefresh();
 
 				// Check for listener beans and register them.
+				//10.注册事件监听器
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				//实例化bean
+				//11.spring容器创建bean的流程
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
+				//12.刷新容器finishRefresh()完成bean容器
 				finishRefresh();
 			}
 
@@ -596,10 +610,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		//容器属性设置
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		//属性校验
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -887,12 +903,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		clearResourceCaches();
 
 		// Initialize lifecycle processor for this context.
+		//初始化生命周期相关的处理器
 		initLifecycleProcessor();
 
 		// Propagate refresh to lifecycle processor first.
+		//调用生命周期的onRefresh方法
 		getLifecycleProcessor().onRefresh();
 
 		// Publish the final event.
+		//发布容器刷新完成事件
 		publishEvent(new ContextRefreshedEvent(this));
 
 		// Participate in LiveBeansView MBean, if active.

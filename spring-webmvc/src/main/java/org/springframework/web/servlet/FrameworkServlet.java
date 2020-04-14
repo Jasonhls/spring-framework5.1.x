@@ -558,23 +558,39 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #setContextConfigLocation
 	 */
 	protected WebApplicationContext initWebApplicationContext() {
+		/**
+		 * 从ServletContext对象中获取到Spring root 上下文对象,为啥可以获取,
+		 * 因为我们在Spring 根容器上下文创建成功后放入到了ServletContext中，这个代码在
+		 * ContextLoaderListener的contextInitialized方法中，tomcat容器启动中，会调用
+		 * Listener的初始化方法
+		 */
 		WebApplicationContext rootContext =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = null;
 
+		/**
+		 * webApplicationContext对象是在创建DispatcherServlet对象的时候,存放进来的一个springmvc web的上下文对象
+		 */
 		if (this.webApplicationContext != null) {
 			// A context instance was injected at construction time -> use it
 			wac = this.webApplicationContext;
 			if (wac instanceof ConfigurableWebApplicationContext) {
 				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) wac;
+				//判断子容器有没有调用refresh方法
 				if (!cwac.isActive()) {
 					// The context has not yet been refreshed -> provide services such as
 					// setting the parent context, setting the application context id, etc
 					if (cwac.getParent() == null) {
 						// The context instance was injected without an explicit parent -> set
 						// the root application context (if any; may be null) as the parent
+						/**
+						 * cwac子容器，rootContext父容器，这里子容器将父容器设置为parent
+						 */
 						cwac.setParent(rootContext);
 					}
+					/**
+					 * 作为SpringMvc 上下文刷新
+					 */
 					configureAndRefreshWebApplicationContext(cwac);
 				}
 			}
@@ -684,6 +700,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 		}
 
+		//为SpringWeb上下文设置对象
 		wac.setServletContext(getServletContext());
 		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
@@ -699,6 +716,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		postProcessWebApplicationContext(wac);
 		applyInitializers(wac);
+		//刷新子容器
 		wac.refresh();
 	}
 

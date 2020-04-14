@@ -267,9 +267,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
 					ConfigurationClassUtils.isLiteConfigurationClass(beanDef)) {
 				if (logger.isDebugEnabled()) {
+					//打印该Bean已经被作为一个configuration执行过
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
+			//checkConfigurationClassCandidate方法中会给BeanDefinition
+			// 设置CONFIGURATION_CLASS_ATTRIBUTE属性和ORDER_ATTRIBUTE属性
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}

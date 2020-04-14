@@ -1,0 +1,116 @@
+=========Spring整合SpringMVC  web.xml========
+<context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:spring.xml</param-value> <!--这里的spring.xml是根容器配置，文件名随便取-->
+</context-param>
+
+<listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>
+
+<servlet>
+    <servlet-name>SpringMVC</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:spring-mvc.xml</param-value>  <!--这里的spring-mvc.xml是子容器配置，文件名随便取-->
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+    <async-supported>true</async-supported>
+</servlet>
+<servlet-mapping>
+    <servlet-name>SpringMVC</servlet-name>
+    <!-- 此处可以配置成*.do，对应struts的后缀习惯 -->
+    <url-pattern>/</url-pattern>
+</servlet-mapping>
+==============================================
+
+根容器xml方式的配置
+===================spring.xml============================
+    <!--配置自动扫描的包-->
+    <context:component:scan base-package="com.ssh">
+        <!--扫描时跳过 @Controller 注解的JAVA类(控制器) -->
+        <context:exclude-filter type="annotation"
+            expression="org.springframework.stereotype.Controller"/>
+    </context:component:scan>
+====================================================
+
+子容器xml方式的配置
+===============spring-mvc.xml========================
+
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframwork.http.converter.json.MappingJacksonHttpMessageConverter>
+                <property name="obejctMapper" ref="customObjectMapper"></property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--这里的配置是自动给后面action的方法return的字符串加上前缀和后缀，变成一个可用的url地址-->
+        <property name="prefix" value="/WEB-INF/jsp"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 文件上传下载 -->
+
+    ......
+======================================================
+
+说明：
+上面的web.xml配置完全可以用AbstractDispatcherServletInitializer的下面的两行代码代替
+@Override
+public void onStartup(ServletContext servletContext) throws ServletException {
+    //1.创建我们的根容器，此时根容器是空容器对象，没有组件
+    //2.new 了ContextLoaderListener
+    //3.把我们的根配置类保存到根容器中
+    //4.把ContextLoaderListener注册到servletContext
+    super.onStartup(servletContext);
+    //创建我们的子容器，此时子容器也是空容器对象
+    //创建DispatcherServlet
+    registerDispatcherServlet(servletContext);
+}
+
+ContextLoaderListener------->spring.xml----->SpringMvc中父容器的配置  数据源，dao，service
+DispatcherServlet------>spring-mvc.xml----->SpringMvc中子容器的配置   controller
+web.xml --->不要web.xml，使用配置的方式
+web容器中，注册三大组件servlet，listener，filter的方式
+通过xml配置，也可以通过注解的方式(在servlet3.0后) @WebServlet @WebListener @WebFilter，也可以通过
+java的configuration方式，也可通过SPI机制
+
+
+Spring整合SpringMvc源码解析：
+1.Servlet3.x新规范
+2.JavaSPI服务动态扩展机制
+3.SpringIoc父容器启动源码
+4.SpringIoc子容器启动源码
+5.DispatcherServlet源码
+
+父容器：
+1.只负责扫描service和dao组件，不扫描controller
+子容器：
+1.只负责扫描controller组件
+如果父子容器把service，dao，controller组件都扫描了，会重复浪费内存，导致内存飙升。
+
+web三大组件servlet，listener，filter，tomcat启动的时候，会调用listener和filter中的方法，
+也会调用servlet的init方法，这些是java web的特性
+
+总结：
+根容器填充组件方法：
+ContextLoaderListener =======>如果是xml配置的方式，会调用ContextLoaderListener的无参构造器
+                      =======>如果是java配置的方式，会调用ContextLoaderListener的有参构造器
+通过ContextLoaderListener的init方法，为父容器填充组件，比如填充service  dao对象。
+
+子容器填充组件方法：
+在tomcat启动后，如果java web的servlet被创建后，会回调用init(ServletConfig config)方法，
+会调用servlet子类GenericServlet的init(ServletConfig config)方法，该方法中调用了
+GenericServlet的init()方法，会调用GenericServlet子类的HttpServletBean的init()方法，
+该方法中就会为子容器填充组件。
+
+请求处理路径分析：
+FrameworkServlet中处理请求的方法processRequest(HttpServletRequest request, HttpServletResponse response)中会
+调用doService(HttpServletRequest request, HttpServletResponse response)方法，然后调用子类DispatcherServlet的
+doService方法，就会调用到doDispatch(HttpServletRequest request, HttpServletResponse response)方法。
+
+FrameworkServlet父类HttpServlet，HttpServlet父类为GenericServlet，GenericServlet父类为Servlet，tomcat中请求过来，
+会调用servlet的service(ServletRequest req, ServletResponse res)方法。
