@@ -177,8 +177,8 @@ task schemaZip(type: Zip) {
 		def Properties schemas = new Properties();
 
 		subproject.sourceSets.main.resources.find {
-				it.path.endsWith("META-INF\\spring.schemas")
-			}?.withInputStream { schemas.load(it) }
+			it.path.endsWith("META-INF\\spring.schemas")
+		}?.withInputStream { schemas.load(it) }
 
 		for (def key : schemas.keySet()) {
 			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')

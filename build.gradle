@@ -77,7 +77,12 @@ configure(allprojects) { project ->
 		}
 	}
 
-	configurations.all {
+	allprojects {
+		repositories {
+			maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+		}
+	}
+	/*configurations.all {
 		// Check for updates every build
 		resolutionStrategy.cacheChangingModulesFor 0, "seconds"
 
@@ -87,7 +92,7 @@ configure(allprojects) { project ->
 				details.useVersion slf4jVersion
 			}
 		}
-	}
+	}*/
 
 	def commonCompilerArgs =
 			["-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
