@@ -58,17 +58,17 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	private static final String SLASH = "/";
 
-
+    //前缀，表示约定好的视图名称需要加上的前缀，默认是空串
 	private String prefix = "";
-
+	//后缀，表示约定好的视图名称需要加上的后缀，默认是空串
 	private String suffix = "";
-
+	//分隔符，默认是斜杠"/"
 	private String separator = SLASH;
-
+	//如果首字符是分隔符，是否要去掉，默认是true
 	private boolean stripLeadingSlash = true;
-
+	//如果最后一个字符是分隔符，是否要去掉，默认是true
 	private boolean stripTrailingSlash = true;
-
+	//如果请求路径包含扩展名是否要去除，默认是true
 	private boolean stripExtension = true;
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
