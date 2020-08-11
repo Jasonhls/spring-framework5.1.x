@@ -312,14 +312,16 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 					(this.staticAttributes.isEmpty() ? "" : ", static attributes " + this.staticAttributes));
 		}
 
+		//将属性和动态值全部封装到一个map中
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
 		prepareResponse(request, response);
+		//处理页面跳转，这里还是以org.springframework.web.servlet.view.InternalResourceViewResolver为例子说明
 		renderMergedOutputModel(mergedModel, getRequestToExpose(request), response);
 	}
 
 	/**
 	 * Creates a combined output Map (never {@code null}) that includes dynamic values and static attributes.
-	 * Dynamic values take precedence over static attributes.
+	 * Dynamic values take precedence over static attributes. 动态值优先于静态属性
 	 */
 	protected Map<String, Object> createMergedOutputModel(@Nullable Map<String, ?> model,
 			HttpServletRequest request, HttpServletResponse response) {

@@ -1194,7 +1194,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Did the handler return a view to render?
 		//如果在Handler实例的处理中返回了view，那么需要做页面的处理
 		if (mv != null && !mv.wasCleared()) {
-			//处理页面跳转
+			//处理页面跳转核心逻辑
 			render(mv, request, response);
 			if (errorView) {
 				WebUtils.clearErrorRequestAttributes(request);
@@ -1465,6 +1465,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (mv.getStatus() != null) {
 				response.setStatus(mv.getStatus().value());
 			}
+			//进一步处理跳转逻辑，这里还是以org.springframework.web.servlet.view.InternalResourceViewResolver为例子说明
 			view.render(mv.getModelInternal(), request, response);
 		}
 		catch (Exception ex) {
@@ -1506,8 +1507,12 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		if (this.viewResolvers != null) {
 			for (ViewResolver viewResolver : this.viewResolvers) {
+				//默认的viewResolver是org.springframework.web.servlet.view.InternalResourceViewResolver，在DispatcherServlet.properties中可以看到
 				//以org.Springframework.web.servlet.view.InternalResourceViewResolver为例来分析viewResolver逻辑的解析过程，
 				//其中resolveViewName函数的实现是在其父类AbstractCachingViewResolver中完成的
+				//InternalResourceViewResolver---父类--->UrlBasedViewResolver---父类--->AbstractCachingViewResolver
+				//如果这里的viewResolver为InternalResourceViewResolver，那么下面的resolveViewName就会调用父类AbstractCachingViewResolver中的resolveViewName方法，
+				//因为自己没有，父类UrlBasedViewResolver也没有，而父类AbstractCachingViewResolver有resolveViewName方法
 				View view = viewResolver.resolveViewName(viewName, locale);
 				if (view != null) {
 					return view;
