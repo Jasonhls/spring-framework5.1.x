@@ -194,6 +194,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Detects handler methods at initialization.
 	 * @see #initHandlerMethods
+	 * 初始化HandlerMethods，也就是初始化带有@Controller注解或@RequestMapping注解修饰的类中的方法
 	 */
 	@Override
 	public void afterPropertiesSet() {
@@ -209,6 +210,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected void initHandlerMethods() {
 		for (String beanName : getCandidateBeanNames()) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+				//初始化带有@Controller注解或@RequestMapping注解修饰的类中的方法
 				processCandidateBean(beanName);
 			}
 		}
@@ -249,7 +251,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
+		//isHandler(Class<?> beanType)方法判断是否有@Controller注解或@RequestMapping注解修饰的类
 		if (beanType != null && isHandler(beanType)) {
+			//初始化带有@Controller注解或@RequestMapping注解修饰的类的方法
 			detectHandlerMethods(beanName);
 		}
 	}
