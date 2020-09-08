@@ -52,6 +52,7 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 			pathMatcherRef = new RuntimeBeanReference(element.getAttribute("path-matcher"));
 		}
 
+		//找到SpringMVC-servlet.xml配置文件中的interceptor标签，并开始遍历
 		List<Element> interceptors = DomUtils.getChildElementsByTagName(element, "bean", "ref", "interceptor");
 		for (Element interceptor : interceptors) {
 			RootBeanDefinition mappedInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
