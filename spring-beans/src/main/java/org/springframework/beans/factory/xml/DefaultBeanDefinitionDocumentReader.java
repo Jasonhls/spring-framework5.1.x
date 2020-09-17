@@ -95,6 +95,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	@Override
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
+		//将传进来的XmlReaderContext赋给DefaultBeanDefinitionDocumentReader的属性XmlReaderContext
 		this.readerContext = readerContext;
 		doRegisterBeanDefinitions(doc.getDocumentElement());
 	}
@@ -129,6 +130,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
 		BeanDefinitionParserDelegate parent = this.delegate;
+		//这个方法里面会把DefaultBeanDefinitionDocumentReader的属性XmlReaderContext赋给创建的BeanDefinitionParserDelegate的属性XmlReaderContext
+		//因此返回值赋给this.delegate，因此this.delegate即BeanDefinitionParserDelegate对象属性XmlReaderContext是DefaultBeanDefinitionDocumentReader传过来的
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 
 		if (this.delegate.isDefaultNamespace(root)) {

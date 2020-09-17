@@ -1417,6 +1417,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele) {
+		//这里被BeanDefinitionParserDelegate调用
 		return parseCustomElement(ele, null);
 	}
 
@@ -1432,11 +1433,14 @@ public class BeanDefinitionParserDelegate {
 		if (namespaceUri == null) {
 			return null;
 		}
+		//根据namespaceUri获取自定义的NamespaceHandler
+		//如果这里是被BeanDefinitionParserDelegate调用，那么这里的this.readerContext就是之前创建的，readerContext中的namespaceHandlerResolver是DefaultNamespaceHandlerResolver
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		//执行自定义的handler的parse方法
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

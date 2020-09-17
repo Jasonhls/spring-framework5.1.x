@@ -524,6 +524,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		// 即使用继承自DefaultListableBeanFactory的子类
 		//记录统计前BeanDefinition的加载个数，
 		int countBefore = getRegistry().getBeanDefinitionCount();
+		//创建XmlReadeContext对象，并将之作为入参，传给DefaultBeanDefinitionDocumentReader的属性XmlReaderContext，然后去注册BeanDefinitions的逻辑
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
 		//记录本次加载的BeanDefinition个数
 		return getRegistry().getBeanDefinitionCount() - countBefore;
@@ -550,6 +551,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Lazily create a default NamespaceHandlerResolver, if not set before.
 	 * @see #createDefaultNamespaceHandlerResolver()
+	 * 获取NamespaceHanderlResolver，如果没有就创建默认的NamespaceHandlerResolver，即DefaultNamespaceHandlerResolver
 	 */
 	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		if (this.namespaceHandlerResolver == null) {
@@ -565,6 +567,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected NamespaceHandlerResolver createDefaultNamespaceHandlerResolver() {
 		ClassLoader cl = (getResourceLoader() != null ? getResourceLoader().getClassLoader() : getBeanClassLoader());
+		//这里创建DefaultNamespaceHandlerResolver对象的时候会把META-INF/spring.handlers赋值给DefaultNamespaceHandlerResolver的属性handlerMappingsLocation
 		return new DefaultNamespaceHandlerResolver(cl);
 	}
 
