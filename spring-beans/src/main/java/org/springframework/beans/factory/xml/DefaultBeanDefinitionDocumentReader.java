@@ -205,6 +205,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 		//对import标签的处理
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
+			//针对import标签的处理逻辑
 			importBeanDefinitionResource(ele);
 		}
 		//对alias标签的处理
@@ -227,6 +228,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * from the given resource into the bean factory.
 	 */
 	protected void importBeanDefinitionResource(Element ele) {
+		//获取resource属性
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
 		if (!StringUtils.hasText(location)) {
 			getReaderContext().error("Resource location must not be empty", ele);
@@ -234,11 +236,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		// Resolve system properties: e.g. "${user.dir}"
+		//解析系统属性，格式入："${user.dir}"
 		location = getReaderContext().getEnvironment().resolveRequiredPlaceholders(location);
 
 		Set<Resource> actualResources = new LinkedHashSet<>(4);
 
 		// Discover whether the location is an absolute or relative URI
+		//判定location是绝对URI还是相对URI
 		boolean absoluteLocation = false;
 		try {
 			absoluteLocation = ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();
@@ -249,6 +253,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		// Absolute or relative?
+		//如果是绝对URI则直接根据地址加载对应的配置文件
 		if (absoluteLocation) {
 			try {
 				int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
@@ -263,14 +268,20 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 		else {
 			// No URL -> considering resource location as relative to the current file.
+			//如果是相对地址则根据相对地址计算出绝对地址
 			try {
 				int importCount;
+				//Resource存在多个子类，例如VfsResource、FileSystemResource，每个Resource子类的createRelative实现方法又不一样，这里先尝试使用子类解析
+				//前面在XmlBeanDefinitionReader的方法registerBeanDefinitions(Document doc, Resource resource) 中创建XmlReaderContext的时候，把解析得到的resource赋给了XmlReaderContext对象的属性resource，
+				//后面在DefaultBeanDefinitionDocumentReader的方法registerBeanDefinitions(Document doc, XmlReaderContext readerContext)中把创建的XmlReaderContext赋给了自己的属性readerContext，
+				//因此这里getReaderContext().getResource()就是之前解析的resource即DefaultResourceLoader.ClassPathContextResource
 				Resource relativeResource = getReaderContext().getResource().createRelative(location);
 				if (relativeResource.exists()) {
 					importCount = getReaderContext().getReader().loadBeanDefinitions(relativeResource);
 					actualResources.add(relativeResource);
 				}
 				else {
+					//如果解析不成功，则使用默认的解析器DefaultPatternResolver进行解析
 					String baseLocation = getReaderContext().getResource().getURL().toString();
 					importCount = getReaderContext().getReader().loadBeanDefinitions(
 							StringUtils.applyRelativePath(baseLocation, location), actualResources);
@@ -287,6 +298,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						"Failed to import bean definitions from relative location [" + location + "]", ele, ex);
 			}
 		}
+		//解析后进行监听器激活处理
 		Resource[] actResArray = actualResources.toArray(new Resource[0]);
 		getReaderContext().fireImportProcessed(location, actResArray, extractSource(ele));
 	}

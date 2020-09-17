@@ -1353,6 +1353,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
+		//刚开始调用了AbstractApplicationContext的无参构造方法的时候，会创建PathMatchingResourcePatternResolver对象赋给AbstractApplicationContext对象的属性resourcePatternResolver
 		return this.resourcePatternResolver.getResources(locationPattern);
 	}
 
