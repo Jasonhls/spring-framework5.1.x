@@ -229,6 +229,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 		this.registriesPostProcessed.add(registryId);
 
+		//解析配置方式的bean
 		processConfigBeanDefinitions(registry);
 	}
 
@@ -259,15 +260,22 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * {@link Configuration} classes.
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
+		//定义解析的配置类的集合
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
 		for (String beanName : candidateNames) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
+			//判断beanDef中是否有属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为full
+			//或beanDef中是否有属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为lite
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
 					ConfigurationClassUtils.isLiteConfigurationClass(beanDef)) {
 				if (logger.isDebugEnabled()) {
-					//打印该Bean已经被作为一个configuration执行过
+					//打印该Bean已经被作为一个configuration执行过，为什么呢？
+					//因为下面的ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)方法中，
+					//解析的beanDef如果有注解@Configuration，那么会给该beanDef中添加一个属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为full
+					//解析的beanDef如果有注解@Component，@ComponentScan，@Import，@ImportResource，或该类方法上包含有注解@Bean，那么
+					//会给该beanDef中添加一个属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为lite
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
@@ -315,6 +323,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
+			//解析配置的核心逻辑
 			parser.parse(candidates);
 			parser.validate();
 

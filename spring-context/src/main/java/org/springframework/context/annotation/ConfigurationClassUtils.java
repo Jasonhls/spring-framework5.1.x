@@ -51,9 +51,15 @@ abstract class ConfigurationClassUtils {
 
 	private static final String CONFIGURATION_CLASS_LITE = "lite";
 
+	/**
+	 * 下面这个常量的值为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass
+	 */
 	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
+	/**
+	 * 下面这个常量的值为org.springframework.context.annotation.ConfigurationClassPostProcessor.order
+	 */
 	private static final String ORDER_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "order");
 
