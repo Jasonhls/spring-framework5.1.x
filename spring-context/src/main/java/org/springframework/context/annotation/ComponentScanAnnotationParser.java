@@ -95,11 +95,13 @@ class ComponentScanAnnotationParser {
 
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
+				//添加includeFilters条件过滤，includeFilters这个属性是ClassPathBeanDefinitionScanner对象的父类ClassPathScanningCandidateComponentProvider的属性
 				scanner.addIncludeFilter(typeFilter);
 			}
 		}
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("excludeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
+				//添加excludeFilters条件过滤，excludeFilters这个属性是ClassPathBeanDefinitionScanner对象的父类ClassPathScanningCandidateComponentProvider的属性
 				scanner.addExcludeFilter(typeFilter);
 			}
 		}
@@ -129,6 +131,7 @@ class ComponentScanAnnotationParser {
 				return declaringClass.equals(className);
 			}
 		});
+		//ClassPathBeanDefinitionScanner解析配置类中@ComponentScan注解的扫描包
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 

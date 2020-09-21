@@ -281,6 +281,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 			//checkConfigurationClassCandidate方法中会给BeanDefinition
 			// 设置CONFIGURATION_CLASS_ATTRIBUTE属性和ORDER_ATTRIBUTE属性
+			//返回true，把该beanDef放入configCandidates集合中
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
@@ -323,7 +324,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
-			//解析配置的核心逻辑
+			//解析配置的核心逻辑，
+			// 如果配置类中带有@Import注解和@ImportResource注解，则会把这两个注解的信息解析出来放入candidates中
+			//配置类中带有@ComponentScans，@ComponentScan会直接在这个解析过程中注入到spring容器中
 			parser.parse(candidates);
 			parser.validate();
 
@@ -336,6 +339,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
+			//解析configClasses中的信息
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 
