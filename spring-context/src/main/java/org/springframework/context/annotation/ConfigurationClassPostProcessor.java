@@ -325,8 +325,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
 			//解析配置的核心逻辑，
-			// 如果配置类中带有@Import注解和@ImportResource注解，则会把这两个注解的信息解析出来放入candidates中
-			//配置类中带有@ComponentScans，@ComponentScan会直接在这个解析过程中注入到spring容器中
+			//带有@Import注解和@ImportResource注解，则会把这两个注解的信息解析出来放入ConfigurationClass的属性importedResources中
+			//带有@ComponentScans，@ComponentScan会直接在这个解析过程中注入到spring容器中
+			//带有@Bean注解的方法会被封装成一个BeanMethod对象，并放入ConfigurationClass的属性beanMethods中
 			parser.parse(candidates);
 			parser.validate();
 
@@ -339,7 +340,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
-			//解析configClasses中的信息
+			//解析ConfigurationClassParser的属性configClasses中的信息
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 

@@ -134,16 +134,27 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
-		//是否是被@Import引入的，如果被@Import引入的类，那么ConfigClass中的属性importedBy有值，不是空的
+		/**
+		 *@Import三种用法：
+		 *  *方式一：直接填class数组的方式
+		 *      @Import（{ 要导入的容器中的组件 } ）：容器会自动注册这个组件，id默认是全类名
+		 *  方式二：ImportSelector方式
+		 *  *方式三：ImportBeanDefinitionRegistrar方式
+		 *      ImportBeanDefinitionRegistrar：手动注册bean到容器
+		 */
+		//解析方式一，通过@Import直接引入class，
+		// 如果被@Import引入的类，那么ConfigClass中的属性importedBy有值的，然后解析这个configClass并注入到spring容器中
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+		//解析配置文件中@Bean注解的
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
-		//从@ImportResource中的配置文件中，向spring容器中注入bean
+		//解析通过@ImportResource引入的配置文件
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		//解析上述方式三，通过@Import引入实现了ImportBeanDefinitionRegistrar接口的class
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
@@ -333,6 +344,7 @@ class ConfigurationClassBeanDefinitionReader {
 				}
 				else {
 					// Primarily ".xml" files but for any other extension as well
+					//如果@ImportResource中指定的文件以.xml后缀结束的，那么就用XmlBeanDefinitionReader
 					readerClass = XmlBeanDefinitionReader.class;
 				}
 			}
@@ -341,6 +353,7 @@ class ConfigurationClassBeanDefinitionReader {
 			if (reader == null) {
 				try {
 					// Instantiate the specified BeanDefinitionReader
+					//通过反射创建BeanDefinitionReader实例
 					reader = readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
 					// Delegate the current ResourceLoader to it if possible
 					if (reader instanceof AbstractBeanDefinitionReader) {
@@ -348,6 +361,7 @@ class ConfigurationClassBeanDefinitionReader {
 						abdr.setResourceLoader(this.resourceLoader);
 						abdr.setEnvironment(this.environment);
 					}
+					//把生成的BeanDefinitionReader放入缓存中
 					readerInstanceCache.put(readerClass, reader);
 				}
 				catch (Throwable ex) {
@@ -357,6 +371,7 @@ class ConfigurationClassBeanDefinitionReader {
 			}
 
 			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
+			//BeanDefinitionReader开始解析@ImportResource中指定的xml文件，并把xml文件中的bean注入到spring容器中
 			reader.loadBeanDefinitions(resource);
 		});
 	}

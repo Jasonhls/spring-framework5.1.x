@@ -564,6 +564,7 @@ class ConfigurationClassParser {
 			this.importStack.push(configClass);
 			try {
 				for (SourceClass candidate : importCandidates) {
+					//如果是实现了ImportSelector接口的
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
@@ -575,10 +576,13 @@ class ConfigurationClassParser {
 						}
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
+							//根据自定义的ImportSelector的selectImports得到的名称集合，批量重新生成新的SourceClass，然后递归执行processImports方法，就会去执行下面第三种情况中的逻辑了
+							//也就是当作一个configuration来解析
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
+					//如果是实现了ImportBeanDefinitionRegistrar接口的class，解析该class信息并放入ConfigurationClass的属性importBeanDefinitionRegistrars中
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
@@ -594,6 +598,7 @@ class ConfigurationClassParser {
 						// process it as an @Configuration class
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
+						//括号中的candidate.asConfigClass(configClass)中会把configClass添加到ConfigurationClass对象的属性importedBy属性中
 						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 				}
@@ -949,6 +954,7 @@ class ConfigurationClassParser {
 		}
 
 		public ConfigurationClass asConfigClass(ConfigurationClass importedBy) {
+			//在ConfigurationClass的构造方法中把importedBy添加到ConfigurationClass的属性importedBy中
 			if (this.source instanceof Class) {
 				return new ConfigurationClass((Class<?>) this.source, importedBy);
 			}
