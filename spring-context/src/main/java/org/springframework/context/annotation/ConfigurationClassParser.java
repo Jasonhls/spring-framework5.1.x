@@ -272,6 +272,7 @@ class ConfigurationClassParser {
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class,
 				org.springframework.context.annotation.PropertySource.class)) {
+			//this.environment通过前面ConfigurationClassParser的构造方法，传进来的
 			if (this.environment instanceof ConfigurableEnvironment) {
 				//解析@PropertySource注解
 				processPropertySource(propertySource);
@@ -463,6 +464,7 @@ class ConfigurationClassParser {
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
 				//创建propertySource，这个过程中会解析@PropertySource指定的配置文件中的资源，并解析成Properties，
 				// 然后赋值给ResourcePropertySource对象的属性source，这个属性是ResourcePropertySource父类PropertySource的属性
+				//然后会把上面创建的PropertySource添加到this.environment属性即StandardEnvironment对象的属性propertySources中
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
 			catch (IllegalArgumentException | FileNotFoundException | UnknownHostException ex) {
@@ -481,6 +483,7 @@ class ConfigurationClassParser {
 
 	private void addPropertySource(PropertySource<?> propertySource) {
 		String name = propertySource.getName();
+		//获取this.environment属性，即StandardEnvironment对象中的propertySources属性
 		MutablePropertySources propertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
 
 		if (this.propertySourceNames.contains(name)) {
@@ -506,6 +509,7 @@ class ConfigurationClassParser {
 		}
 
 		if (this.propertySourceNames.isEmpty()) {
+			//PropertySource添加到this.environment属性即StandardEnvironment对象的属性propertySources中
 			propertySources.addLast(propertySource);
 		}
 		else {

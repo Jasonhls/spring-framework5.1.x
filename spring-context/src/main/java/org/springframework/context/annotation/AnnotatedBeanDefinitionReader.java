@@ -68,6 +68,8 @@ public class AnnotatedBeanDefinitionReader {
 	 * @see #setEnvironment(Environment)
 	 */
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
+		//这里面会创建environment，即StandardEnvironment对象，它的属性(是父类AbstractEnvironment的属性)propertySources（即MutablePropertySources对象），
+		// 用来存配置的key和value的
 		this(registry, getOrCreateEnvironment(registry));
 	}
 

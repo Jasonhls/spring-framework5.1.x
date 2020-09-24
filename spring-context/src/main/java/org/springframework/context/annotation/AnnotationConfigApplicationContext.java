@@ -63,6 +63,12 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		/**
+		 * AnnotationConfigApplicationContext对象的属性reader(即AnnotatedBeanDefinitionReader对象)，
+		 * AnnotatedBeanDefinitionReader类的属性conditionEvaluator(即ConditionEvaluator对象)，
+		 * ConditionEvaluator对象中的属性context(即ConditionContextImpl对象)，ConditionContextImpl对象中的属性environment(即StandardEnvironment对象)
+		 * StandardEnvironment对象中属性propertySources（即MutablePropertySources对象），用来存配置的key和value的
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
