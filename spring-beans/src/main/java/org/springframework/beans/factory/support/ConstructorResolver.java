@@ -436,9 +436,14 @@ class ConstructorResolver {
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 
+			//获取被@Configuration注释的类的所有的declaredMethods方法
 			Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
 			List<Method> candidateList = new ArrayList<>();
 			for (Method candidate : rawCandidates) {
+				//判断是不是factoryMethod，通过RootBeanDefinition中的属性factoryMethodName(
+				// 前面在ConfigurationClassPostProcessor的方法processConfigBeanDefinitions中代码行this.reader.loadBeanDefinitions(configClasses)中
+				// 会解析被@Bean注解的方法会被创建成一个ConfigurationClassBeanDefinition对象，
+				// 同时会给属性factoryMethodName赋值)去寻找factoryMethod方法
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
 					candidateList.add(candidate);
 				}

@@ -221,6 +221,7 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		//在配置文件中的@Bean方法会被定义为ConfigurationClassBeanDefinition对象，然后注入到spring容器中
 		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata);
 		beanDef.setResource(configClass.getResource());
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
@@ -233,6 +234,8 @@ class ConfigurationClassBeanDefinitionReader {
 		else {
 			// instance @Bean method
 			beanDef.setFactoryBeanName(configClass.getBeanName());
+			//这里面会设置factoryMethodName属性，后面在getBean方法中会使用到，会获取@Bean注释的方法所在的类的所有的declaredMethods方法，
+			// 然后判断是否是FactoryMethod，如果是，就会执行method.invoke()，即执行被@Bean注释的方法体。
 			beanDef.setUniqueFactoryMethodName(methodName);
 		}
 		beanDef.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);

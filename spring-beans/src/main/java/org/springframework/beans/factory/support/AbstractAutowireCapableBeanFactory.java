@@ -1177,6 +1177,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		//@Bean修饰的bean被创建  method.invoke(ob,args)
 		if (mbd.getFactoryMethodName() != null) {
+			//这里面会执行配置类中被注解@Bean注释的方法体
 			return instantiateUsingFactoryMethod(beanName, mbd, args);
 		}
 

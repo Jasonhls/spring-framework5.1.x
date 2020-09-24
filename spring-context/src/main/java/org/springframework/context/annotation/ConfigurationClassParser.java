@@ -268,11 +268,12 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @PropertySource annotations
-		//如果该类中带有@PropertySources或@PropertySource注解，解析注解的属性值
+		//如果该类中带有@PropertySources或@PropertySource注解，解析注解的属性值，比如@PropertySource注解包含三个属性name，value，ignoreResourceNotFound
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class,
 				org.springframework.context.annotation.PropertySource.class)) {
 			if (this.environment instanceof ConfigurableEnvironment) {
+				//解析@PropertySource注解
 				processPropertySource(propertySource);
 			}
 			else {
@@ -452,6 +453,7 @@ class ConfigurationClassParser {
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 
 		Class<? extends PropertySourceFactory> factoryClass = propertySource.getClass("factory");
+		//如果@PropertySource的属性factory为PropertySourceFactory.class，那么factory为DefaultPropertySourceFactory对象
 		PropertySourceFactory factory = (factoryClass == PropertySourceFactory.class ?
 				DEFAULT_PROPERTY_SOURCE_FACTORY : BeanUtils.instantiateClass(factoryClass));
 
@@ -459,6 +461,8 @@ class ConfigurationClassParser {
 			try {
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
+				//创建propertySource，这个过程中会解析@PropertySource指定的配置文件中的资源，并解析成Properties，
+				// 然后赋值给ResourcePropertySource对象的属性source，这个属性是ResourcePropertySource父类PropertySource的属性
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
 			catch (IllegalArgumentException | FileNotFoundException | UnknownHostException ex) {

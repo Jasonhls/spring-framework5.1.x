@@ -328,6 +328,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			//带有@Import注解和@ImportResource注解，则会把这两个注解的信息解析出来放入ConfigurationClass的属性importedResources中
 			//带有@ComponentScans，@ComponentScan会直接在这个解析过程中注入到spring容器中
 			//带有@Bean注解的方法会被封装成一个BeanMethod对象，并放入ConfigurationClass的属性beanMethods中
+			//带有@Configuratioin的配置类会在这里注入到spring容器中，但是该配置类中配置的信息不会在这里注入到spring容器中，
+			//而是保存到ConfigurationClassParser的属性configurationClasses中，然后在下面的this.reader.loadBeanDefinitions(configClasses)中去解析
 			parser.parse(candidates);
 			parser.validate();
 
@@ -340,7 +342,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
-			//解析ConfigurationClassParser的属性configClasses中的信息
+			//解析ConfigurationClassParser的属性configClasses中的信息，即解析配置文件中所引入的配置信息
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 
