@@ -506,6 +506,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			//第1次调用后置处理器
 			//比如aop和事务的关键在这里，这里解析我们的aop切面进行缓存
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
@@ -559,8 +560,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+			//第2次调用后置处理器
 			/**
-			 * 第2次调用后置处理器
 			 * 创建bean实例，并将实例放在包装类BeanWrapper中返回
 			 * 1.通过工厂方法创建Bean实例   method.invoke(obj,args)
 			 * 2.通过构造方法自动注入创建实例Bean  clazz.newInstance(constructors)
@@ -583,6 +584,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					//第3次调用后置处理器
 					//AutowiredAnnotationBeanPostProcessor 预解析@Autowired和@Value，封装到InjectionMetadata，
 					// 这里只是预解析@Autowired、@Value注解信息，不会把真正的值赋值给这些被@Autowired和@Value注释的字段或方法
+					//执行属于MergedBeanDefinitionPostProcessor的BeanPostProcessor处理器
 					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
 				}
 				catch (Throwable ex) {
@@ -605,6 +607,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//getEarlyBeanReference方法会得到singletonFactory，即exposedObject，这个时候还没有填充bean的属性
 			//把bean的singletonFactory添加到singletonFactories
 			//第4次调用后置处理器
+			// 执行属于SmartInstantiationAwareBeanPostProcessor的BeanPostProcessor处理器
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
 
@@ -614,8 +617,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//填充bean的属性，属性注入，InstantiationAwareBeanPostProcessor，调用set方法进行赋值等
 			//这里会把真正的值赋值给那些被@Autowired、@Value注释的字段或方法
 			//第5次，第6次调用后置处理器，注入依赖
+			//执行属于InstantiationAwareBeanPostProcessor的BeanPostProcessor处理器
 			populateBean(beanName, mbd, instanceWrapper);
 			//进行对象初始化操作(这里可能生成代理对象)
+			//会执行BeanPostProcessor的前置初始方法和后置初始方法
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1216,6 +1221,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Candidate constructors for autowiring?
 		//自动装配的候选构造器  SmartInstantiationAwareBeanPostProcessor
 		//第2次调用后置处理器  获取@Autowired 修饰的构造器
+		//调用属于SmartInstantiationAwareBeanPostProcessor的BeanPostProcessor处理器
 		Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
 		//AutowireMode设置为3，采用构造器贪婪模式 最多参数构造器注入
 		//判断是否有@Autowired 修饰的构造器
