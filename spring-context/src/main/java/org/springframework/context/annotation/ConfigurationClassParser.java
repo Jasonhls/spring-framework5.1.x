@@ -274,7 +274,7 @@ class ConfigurationClassParser {
 				org.springframework.context.annotation.PropertySource.class)) {
 			//this.environment通过前面ConfigurationClassParser的构造方法，传进来的
 			if (this.environment instanceof ConfigurableEnvironment) {
-				//解析@PropertySource注解
+				//解析@PropertySource注解，会把@PropertySource引入的配置文件中的变量key和value放到AbstractBeanFactory的environment属性中
 				processPropertySource(propertySource);
 			}
 			else {
@@ -462,8 +462,8 @@ class ConfigurationClassParser {
 			try {
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
-				//创建propertySource，这个过程中会解析@PropertySource指定的配置文件中的资源，并解析成Properties，
-				// 然后赋值给ResourcePropertySource对象的属性source，这个属性是ResourcePropertySource父类PropertySource的属性
+				//使用PropertySourceFactory创建propertySource，这个过程中会解析@PropertySource指定的配置文件中的资源，并解析成Properties，
+				// 然后赋值给ResourcePropertySource对象的父类属性source，这个属性是ResourcePropertySource父类PropertySource的属性
 				//然后会把上面创建的PropertySource添加到this.environment属性即StandardEnvironment对象的属性propertySources中
 				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}

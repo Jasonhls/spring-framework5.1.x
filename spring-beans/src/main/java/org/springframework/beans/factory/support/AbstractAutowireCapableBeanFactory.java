@@ -620,6 +620,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//执行属于InstantiationAwareBeanPostProcessor的BeanPostProcessor处理器
 			populateBean(beanName, mbd, instanceWrapper);
 			//进行对象初始化操作(这里可能生成代理对象)
+			//第7次调用后置处理器
 			//会执行BeanPostProcessor的前置初始方法和后置初始方法
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
@@ -1801,18 +1802,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}, getAccessControlContext());
 		}
 		else {
-			//若我们的bean实现了XXXAware接口进行方法的回调
+			//若我们的bean实现了XXXAware接口进行方法的回调，比如BeanNameAware，BeanClassLoaderAware和BeanFactoryAware
 			invokeAwareMethods(beanName, bean);
 		}
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
-			//调用我们的bean的后置处理器的postProcessBeforeInitialization方法
+			//调用我们的bean的后置处理器的postProcessBeforeInitialization方法，如果有ApplicationContextAwareProcessor这个处理器，也会调用一些Aware子类的接口中对应的set方法
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
-			//调用初始化方法
+			//调用初始化方法，比如实现了InitializingBean接口，则执行afterPropertiesSet()方法，然后执行自定义的初始化方法
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
