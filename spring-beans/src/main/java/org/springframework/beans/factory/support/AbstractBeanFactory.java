@@ -859,6 +859,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		String result = value;
 		for (StringValueResolver resolver : this.embeddedValueResolvers) {
+			//获取比如被@Value("${db.driverClass}")注释的db.driverClass的值
 			result = resolver.resolveStringValue(result);
 			if (result == null) {
 				return null;

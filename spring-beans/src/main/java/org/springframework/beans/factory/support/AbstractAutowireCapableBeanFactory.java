@@ -412,6 +412,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			//如果这里的BeanPostProcessor是ApplicationContextAwareProcessor，该方法中会去执行
+			//如果bean实现了EnvironmentAware接口，执行setEnvironment，如果实现了EmbeddedValueResolverAware，执行setEmbeddedValueResolver，
+			//如果实现了ResourceLoaderAware，执行setResourceLoader，如果实现了ApplicationEventPublisherAware，执行setApplicationEventPublisher，
+			//如果实现了MessageSourceAware，执行setMessageSource，如果实现了ApplicationContextAware，执行setApplicationContext
 			Object current = processor.postProcessBeforeInitialization(result, beanName);
 			if (current == null) {
 				return result;
@@ -577,7 +581,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					//允许后置处理器修改合并的bean定义
 					//MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition
 					//第3次调用后置处理器
-					//AutowiredAnnotationBeanPostProcessor 预解析@Autowired和@Value，封装到InjectionMetadata
+					//AutowiredAnnotationBeanPostProcessor 预解析@Autowired和@Value，封装到InjectionMetadata，
+					// 这里只是预解析@Autowired、@Value注解信息，不会把真正的值赋值给这些被@Autowired和@Value注释的字段或方法
 					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
 				}
 				catch (Throwable ex) {
@@ -607,6 +612,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object exposedObject = bean;
 		try {
 			//填充bean的属性，属性注入，InstantiationAwareBeanPostProcessor，调用set方法进行赋值等
+			//这里会把真正的值赋值给那些被@Autowired、@Value注释的字段或方法
 			//第5次，第6次调用后置处理器，注入依赖
 			populateBean(beanName, mbd, instanceWrapper);
 			//进行对象初始化操作(这里可能生成代理对象)
@@ -1093,6 +1099,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (BeanPostProcessor bp : getBeanPostProcessors()) {
 			if (bp instanceof MergedBeanDefinitionPostProcessor) {
 				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
+				//如果AutowiredAnnotationBeanPostProcessor处理器，则会预解析@Autowired和@Value，封装注入到InjectionMetadata
 				bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
 			}
 		}
@@ -1433,6 +1440,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+					//这里如果是AutowiredAnnotationBeanPostProcessor，就会解析@Autowired、@Value注解
 					PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 					if (pvsToUse == null) {
 						if (filteredPds == null) {

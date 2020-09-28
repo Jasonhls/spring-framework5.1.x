@@ -127,9 +127,13 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertySources == null) {
+			//创建一个MutablePropertySource对象
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
 				this.propertySources.addLast(
+						//添加一个PropertySource接口子类，然后把PropertySourcesPlaceholderConfigurer对象的environment属性传进去
+						//PropertySourcesPlaceholderConfigurer属性environment是通过在getBean方法中的initializeBean方法中，执行BeanPostProcessor的前置方法，
+						//当执行ApplicationContextAwareProcessor处理器的前置方法时候，如果实现了EnvironmentAware接口，那么这个bean就会执行setEnvironment方法设置属性environment
 					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
 						@Override
 						@Nullable
@@ -154,6 +158,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			}
 		}
 
+		//把MutablePropertySources对象封装到PropertySourcesPropertyResolver对象中，然后向AbstractBeanFactory中添加StringValueResolver
 		processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
 		this.appliedPropertySources = this.propertySources;
 	}
@@ -169,6 +174,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
 		propertyResolver.setValueSeparator(this.valueSeparator);
 
+		//创建一个StringValueResolver对象
 		StringValueResolver valueResolver = strVal -> {
 			String resolved = (this.ignoreUnresolvablePlaceholders ?
 					propertyResolver.resolvePlaceholders(strVal) :
@@ -179,6 +185,9 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			return (resolved.equals(this.nullValue) ? null : resolved);
 		};
 
+		//将StringValueResolver对象添加到AbstractBeanFactory中，StringValueResolver属性PropertyResolver（是PropertySourcesPropertyResolver对象），
+		//PropertySourcesPropertyResolver对象的属性propertySources(是MutablePropertySources对象)，该对象的属性propertySourceList中包含了
+		// 自定义的属性对象(比如解析dg.properties配置文件生成的)PropertiesPropertySource对象，该对象中就包含了自定义的db.properties配置文件中配置的key和value
 		doProcessProperties(beanFactoryToProcess, valueResolver);
 	}
 

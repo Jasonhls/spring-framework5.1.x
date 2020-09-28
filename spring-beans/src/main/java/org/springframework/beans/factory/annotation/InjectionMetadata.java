@@ -68,7 +68,9 @@ public class InjectionMetadata {
 		for (InjectedElement element : this.injectedElements) {
 			Member member = element.getMember();
 			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
+				//给RootBeanDefinition的属性externallyManagedConfigMembers赋值
 				beanDefinition.registerExternallyManagedConfigMember(member);
+				//给InjectionMetadata对象的属性checkedElements赋值
 				checkedElements.add(element);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Registered injected element on class [" + this.targetClass.getName() + "]: " + element);
@@ -87,6 +89,7 @@ public class InjectionMetadata {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
 				}
+				//开始注入字段或方法
 				element.inject(target, beanName, pvs);
 			}
 		}
