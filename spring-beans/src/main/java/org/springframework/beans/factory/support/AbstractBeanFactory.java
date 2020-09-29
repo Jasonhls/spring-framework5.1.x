@@ -324,7 +324,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Create bean instance.
 				if (mbd.isSingleton()) {
-					//getSinleton方法中，会把beanName添加到singletonsCurrentlyInCreation中
+					//getSingleton方法中，会把beanName添加到singletonsCurrentlyInCreation中
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							//创建单例bean实例
@@ -338,6 +338,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							throw ex;
 						}
 					});
+					//获取了Bean实例后，检查当前bean是否是FactoryBean类型的bean，如果是，
+					// 那么需要调用该bean对应的FactoryBean实例中的getObject()作为返回值
 					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 				}
 
@@ -1657,6 +1659,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
+		//如果指定的name是工厂相关的(以&为前缀的)并且又不是FactoryBean类型的则校验不通过
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			if (beanInstance instanceof NullBean) {
 				return beanInstance;
@@ -1669,19 +1672,29 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
+		//现在我们有一个bean实例，它可能是正常的bean或FactoryBean，如果是用户想要直接获取工厂实例而不是
+		//工厂的getObject方法对应的实例那么传入的name应该加前缀&
+		//如果不是FactoryBean，直接返回，如果是FactoryBean，那就判断name是否以&开头的，如果是直接返回
 		if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
 			return beanInstance;
 		}
 
+		//如果到了这里，那么beanInstance就是FactoryBean，并且name不是以&开头的
+		//加载FactoryBean
 		Object object = null;
 		if (mbd == null) {
+			//尝试从缓存中加载Bean
 			object = getCachedObjectForFactoryBean(beanName);
 		}
 		if (object == null) {
 			// Return bean instance from factory.
+			//这里已经明确知道beanInstance为FactoryBean类型
 			FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
 			// Caches object obtained from FactoryBean if it is a singleton.
+			//判断DefaultListableBeanFactory的属性beanDefinitionMap中是否含有beanName
 			if (mbd == null && containsBeanDefinition(beanName)) {
+				//将存储XML配置文件的GenericBeanDefinition转换为RootBeanDefinition，
+				// 如果指定BeanName是子Bean的话同时会合并父类的相关属性
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
