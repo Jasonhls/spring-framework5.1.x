@@ -251,6 +251,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (recordSuppressedExceptions) {
 						this.suppressedExceptions = null;
 					}
+					//将beanName从singletonsCurrentlyInCreation(标识正在被创建的bean)中移除
 					afterSingletonCreation(beanName);
 				}
 				if (newSingleton) {

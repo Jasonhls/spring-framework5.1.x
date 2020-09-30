@@ -100,6 +100,7 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
+		//根据resource获取bean的元数据，并构造成SimpleMetadataReader对象，该构造方法中会解析bean的各种元数据，也会解析各种bean
 		return new SimpleMetadataReader(resource, this.resourceLoader.getClassLoader());
 	}
 

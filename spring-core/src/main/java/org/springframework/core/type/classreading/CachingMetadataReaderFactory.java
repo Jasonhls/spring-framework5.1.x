@@ -120,6 +120,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 			// No synchronization necessary...
 			MetadataReader metadataReader = this.metadataReaderCache.get(resource);
 			if (metadataReader == null) {
+				//根据resource获取bean的元数据
 				metadataReader = super.getMetadataReader(resource);
 				this.metadataReaderCache.put(resource, metadataReader);
 			}
@@ -129,6 +130,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 			synchronized (this.metadataReaderCache) {
 				MetadataReader metadataReader = this.metadataReaderCache.get(resource);
 				if (metadataReader == null) {
+					//根据resource获取bean的元数据
 					metadataReader = super.getMetadataReader(resource);
 					this.metadataReaderCache.put(resource, metadataReader);
 				}

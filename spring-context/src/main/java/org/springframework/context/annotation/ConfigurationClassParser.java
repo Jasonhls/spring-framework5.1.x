@@ -292,6 +292,9 @@ class ConfigurationClassParser {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
 				//解析@ComponentScan注解或@ComponentScans注解的核心逻辑
+				//this.componentScanParser在前面ConfigurationClassPostProcessor的processConfigBeanDefinitions方法中，
+				// 创建ConfigurationClassParser对象的时候，创建了ComponentScanAnnotationParser对象赋值给this.componentScanParser的
+				//这个方法中会解析bean定义的各种注解，比如@PostConstruct
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed

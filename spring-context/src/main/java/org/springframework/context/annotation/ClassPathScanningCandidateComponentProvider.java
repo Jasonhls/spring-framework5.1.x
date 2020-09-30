@@ -427,6 +427,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				}
 				if (resource.isReadable()) {
 					try {
+						//getMetadataReaderFactory()获取的是CachingMetadataReaderFactory对象
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						//执行前面添加到ClassPathBeanDefinitionScanner对象的属性includeFilters和excludeFilters中的过滤器
 						if (isCandidateComponent(metadataReader)) {

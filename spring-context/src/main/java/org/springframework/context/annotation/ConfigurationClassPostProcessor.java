@@ -320,6 +320,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		//这里创建了ConfigurationClassParser对象，然后把几个参数赋给了ConfigurationClassParser对象对应的属性，比如environment
 		//this.environment的值是通过Aware机制把容器的environment传过来的，通过实现EnvironmentAware接口执行setEnvironment方法，
 		//把容器的environment赋给this.environment
+		//构造方法中会创建一个ComponentScanAnnotationParser赋给ConfigurationClassParser的属性componentScanParser
+		//常见的容器的属性environment，resourceLoader等等都会传进去
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
