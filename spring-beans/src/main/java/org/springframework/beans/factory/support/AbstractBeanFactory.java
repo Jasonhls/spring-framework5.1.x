@@ -240,6 +240,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
 			@Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
 
+		//如果传进来的name带有&，则下面会把去掉&后的值赋给beanName
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
@@ -299,7 +300,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			try {
-				//获取RootBeanDefinition
+				//创建RootBeanDefinition对象，会包装原来最早的BeanDefinition，新创建的RootBeanDefinition对象是单例的
 				final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
@@ -338,6 +339,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							throw ex;
 						}
 					});
+					//获取的sharedInstance对象是beanName对应的bean实例对象
 					//获取了Bean实例后，检查当前bean是否是FactoryBean类型的bean，如果是，
 					// 那么需要调用该bean对应的FactoryBean实例中的getObject()作为返回值
 					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
@@ -1278,6 +1280,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						mbd = ((RootBeanDefinition) bd).cloneBeanDefinition();
 					}
 					else {
+						//包装从配置文件中读取的最早的BeanDefinition
 						mbd = new RootBeanDefinition(bd);
 					}
 				}
@@ -1311,6 +1314,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				// Set default singleton scope, if not configured before.
+				//默认设置新创建的RootBeanDefinition对象为单例的
 				if (!StringUtils.hasLength(mbd.getScope())) {
 					mbd.setScope(SCOPE_SINGLETON);
 				}
@@ -1673,13 +1677,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
 		//现在我们有一个bean实例，它可能是正常的bean或FactoryBean，如果是用户想要直接获取工厂实例而不是
-		//工厂的getObject方法对应的实例那么传入的name应该加前缀&
-		//如果不是FactoryBean，直接返回，如果是FactoryBean，那就判断name是否以&开头的，如果是直接返回
+		//工厂的getObject方法对应的实例那么传入的name应该加前缀&，因为这里的逻辑是这样的，如果加了前缀&，那么会直接返回工厂实例
+		//如果不是FactoryBean或者name是以&为前缀的，则直接返回
 		if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
 			return beanInstance;
 		}
 
-		//如果到了这里，那么beanInstance就是FactoryBean，并且name不是以&开头的
+		//如果到了这里，那么beanInstance肯定就是FactoryBean，并且name不是以&开头的
 		//加载FactoryBean
 		Object object = null;
 		if (mbd == null) {
@@ -1693,11 +1697,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Caches object obtained from FactoryBean if it is a singleton.
 			//判断DefaultListableBeanFactory的属性beanDefinitionMap中是否含有beanName
 			if (mbd == null && containsBeanDefinition(beanName)) {
-				//将存储XML配置文件的GenericBeanDefinition转换为RootBeanDefinition，
+				//前面会将存储XML配置文件的GenericBeanDefinition转换为RootBeanDefinition(默认设置为单例的)，
 				// 如果指定BeanName是子Bean的话同时会合并父类的相关属性
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			//调用getObject()方法获取对象
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;

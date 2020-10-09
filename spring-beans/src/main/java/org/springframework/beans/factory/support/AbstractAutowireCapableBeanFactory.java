@@ -615,7 +615,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
-			//填充bean的属性，属性注入，InstantiationAwareBeanPostProcessor，调用set方法进行赋值等
+			//填充bean的属性，属性注入，会给bean的属性注入值，InstantiationAwareBeanPostProcessor，调用set方法进行赋值等
 			//这里会把真正的值赋值给那些被@Autowired、@Value注释的字段或方法
 			//第5次，第6次调用后置处理器，注入依赖
 			//执行属于InstantiationAwareBeanPostProcessor的BeanPostProcessor处理器
