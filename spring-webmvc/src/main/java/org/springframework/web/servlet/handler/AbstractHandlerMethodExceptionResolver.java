@@ -45,6 +45,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 		}
 		else if (handler instanceof HandlerMethod) {
 			HandlerMethod handlerMethod = (HandlerMethod) handler;
+			//使用HandlerMethod中的bean属性，这个bean属性一般都是String类型(实例名称)或实例
 			handler = handlerMethod.getBean();
 			return super.shouldApplyTo(request, handler);
 		}

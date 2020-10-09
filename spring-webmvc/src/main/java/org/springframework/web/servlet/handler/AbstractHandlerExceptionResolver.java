@@ -50,17 +50,21 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	//默认优先级最低
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	//参数handler支持集合，不在此集合内的handler不会处理
 	@Nullable
 	private Set<?> mappedHandlers;
 
+	//参数handler的类集合支持数组，若handler不在mappedHandlers中，那么handler的类型如果在此数组中，也会被处理
 	@Nullable
 	private Class<?>[] mappedHandlerClasses;
 
 	@Nullable
 	private Log warnLogger;
 
+	//阻止响应数据缓存(响应http头部加入不缓存的头部)，默认不阻止
 	private boolean preventResponseCaching = false;
 
 
@@ -136,8 +140,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	public ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
+		//判断是否支持
 		if (shouldApplyTo(request, handler)) {
+			//响应头部是否支持缓存
 			prepareResponse(ex, response);
+			//抽象方法，由子类实现
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
 				// Print debug message when warn logger is not enabled.
@@ -145,6 +152,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
 				}
 				// Explicitly configured warn logger in logException method.
+				//日志记录
 				logException(ex, request);
 			}
 			return result;

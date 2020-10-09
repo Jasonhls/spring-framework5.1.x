@@ -695,6 +695,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		if (this.detectAllHandlerExceptionResolvers) {
 			// Find all HandlerExceptionResolvers in the ApplicationContext, including ancestor contexts.
+			//寻找spring中所有的HandlerExceptionResolver子类，并放入DispatcherServlet的属性handlerExceptionResolvers中
 			Map<String, HandlerExceptionResolver> matchingBeans = BeanFactoryUtils
 					.beansOfTypeIncludingAncestors(context, HandlerExceptionResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
@@ -717,6 +718,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Ensure we have at least some HandlerExceptionResolvers, by registering
 		// default HandlerExceptionResolvers if no other resolvers are found.
 		if (this.handlerExceptionResolvers == null) {
+			//加载默认的HandlerExceptionResolver的子类，也就是配置文件Dispatcher
 			this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No HandlerExceptionResolvers declared in servlet '" + getServletName() +
@@ -1121,6 +1123,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			/**
 			 * 处理目标方法返回的结果,主要就是渲染视图
 			 * 这个方法里面会调用拦截器的afterCompletion方法，---afterCompletion---
+			 * 处理视图或异常，下面方法是处理异常的核心逻辑
 			 */
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
