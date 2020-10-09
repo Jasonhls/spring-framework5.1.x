@@ -458,6 +458,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						}
 						return;
 					}
+					//判断该注解是否是必须的
 					boolean required = determineRequiredStatus(ann);
 					currElements.add(new AutowiredFieldElement(field, required));
 				}
@@ -484,6 +485,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 									method);
 						}
 					}
+					//判断该注解是否是必须的
 					boolean required = determineRequiredStatus(ann);
 					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 					currElements.add(new AutowiredMethodElement(method, required, pd));
@@ -503,7 +505,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private AnnotationAttributes findAutowiredAnnotation(AccessibleObject ao) {
 		if (ao.getAnnotations().length > 0) {  // autowiring annotations have to be local
 			/**
-			 *AutowiredAnnotationBeanPostProcessor的无参构造方法中，就会把@Autowired、@Value注解添加到属性autowiredAnnotationTypes中
+			 *AutowiredAnnotationBeanPostProcessor的无参构造方法中，就会把@Autowired、@Value注解
+			 * 对应的class即Autowired.class和Value.class添加到属性autowiredAnnotationTypes中
 			 */
 			for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
 				AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
@@ -522,6 +525,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * or method when no beans are found.
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
+	 * 判断该注解是否是必须的
 	 */
 	protected boolean determineRequiredStatus(AnnotationAttributes ann) {
 		return (!ann.containsKey(this.requiredParameterName) ||
