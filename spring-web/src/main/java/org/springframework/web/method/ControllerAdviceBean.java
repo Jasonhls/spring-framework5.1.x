@@ -188,6 +188,11 @@ public class ControllerAdviceBean implements Ordered {
 	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
+		/**
+		 *查询RequestMappingHandlerAdapter对象的属性allBeanNamesByType，key为Object.class对应的value，
+		 * 然后从这些bean中过滤出含有ControllerAdvice注解的，然后创建ControllerAdviceBean对象，并封装beanName和上下文对象，转换为集合返回
+		 */
+
 		return Arrays.stream(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class))
 				.filter(name -> !ScopedProxyUtils.isScopedTarget(name))
 				.filter(name -> context.findAnnotationOnBean(name, ControllerAdvice.class) != null)

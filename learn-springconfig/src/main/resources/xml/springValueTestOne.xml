@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+    ">
+
+    <!--spring扫描注入bean-->
+    <context:component-scan base-package="com.cn.configParser.valueConfig" />
+
+    <!--方式一：-->
+    <!--测试@Value注解的配置文件-->
+    <context:property-placeholder location="classpath:properties/db.properties" file-encoding="UTF-8" ignore-unresolvable="true"/>
+    <!--上面方式等价于下面的方式，即上面方式是下面这种方式的缩写-->
+    <!--<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath:properties/db.properties</value>
+            </list>
+        </property>
+    </bean>-->
+<!--
+    注意：这种方式下，如果你在spring-mvc.xml文件中有如下配置，则一定不能缺少下面的红色部分，关于它的作用以及原理，参见另一篇博客：context:component-scan标签的use-default-filters属性的作用以及原理分析
+-->
+<!-- 配置组件扫描，springmvc容器中只扫描Controller注解 -->
+<!--    <context:component-scan base-package="com.hafiz.www" use-default-filters="false">-->
+<!--        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>-->
+<!--    </context:component-scan>-->
+</beans>

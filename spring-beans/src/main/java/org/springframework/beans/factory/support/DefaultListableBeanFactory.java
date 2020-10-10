@@ -158,12 +158,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
 
 	/** Map from dependency type to corresponding autowired value. */
+	/**
+	 * 定义了依赖类型和其对应的依赖注入对象键值对集合
+	 */
 	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
 
 	/** Map of bean definition objects, keyed by bean name. */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
 
 	/** Map of singleton and non-singleton bean names, keyed by dependency type. */
+	/**
+	 * 定义了依赖类型->BeanNames的映射关系，包括单例和原型Bean
+	 * 具体存储原理是先根据BeanName读取beanDefinitionNames对象或frozenBeanDefinitionNames对象
+	 * 再调用getMergedLocalBeanDefinition(beanName)方法拿到具体的BeanDefinition，满足要求的都保存到List统一返回
+	 */
 	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
 
 	/** Map of singleton-only bean names, keyed by dependency type. */
@@ -478,17 +486,35 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return getBeanNamesForType(type, true, true);
 	}
 
+	/**
+	 * type 表示要查找的bean的类型
+	 *  includeNonSingletons 是否考虑非单例bean
+	 *  allowEagerInit 是否允许提早初始化
+	 * @param type the class or interface to match, or {@code null} for all bean names
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @param allowEagerInit whether to initialize <i>lazy-init singletons</i> and
+	 * <i>objects created by FactoryBeans</i> (or by factory methods with a
+	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
+	 * eagerly initialized to determine their type: So be aware that passing in "true"
+	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 * @return
+	 */
 	@Override
 	public String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
 		}
+		//如果考虑非单例bean，那么缓存使用属性allBeanNamesByType集合对象，如果不考虑非单例bean，那么缓存使用属性singletonBeanNamesByType集合对象
+		//注意这里是直接把集合对象赋给cache，因此下面往cache中添加缓存的时候，即是向集合对象中添加，因此DefaultListableBeanFactory的属性allBeanNamesByType中的值就是这样添加进去的
+		//在AbstractApplicationContext的refresh方法的this.finishBeanFactoryInitialization(beanFactory)代码中会进行缓存
 		Map<Class<?>, String[]> cache =
 				(includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
 		String[] resolvedBeanNames = cache.get(type);
 		if (resolvedBeanNames != null) {
 			return resolvedBeanNames;
 		}
+		//从容器的beanDefinitionNames集合中找出符合type的beanName集合，并缓存起来
 		resolvedBeanNames = doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, true);
 		if (ClassUtils.isCacheSafe(type, getBeanClassLoader())) {
 			cache.put(type, resolvedBeanNames);
