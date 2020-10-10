@@ -144,7 +144,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		if (shouldApplyTo(request, handler)) {
 			//响应头部是否支持缓存
 			prepareResponse(ex, response);
-			//抽象方法，由子类实现
+			//抽象方法，由子类实现，处理异常的核心逻辑
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
 				// Print debug message when warn logger is not enabled.

@@ -77,18 +77,21 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
 		implements ApplicationContextAware, InitializingBean {
 
+	//自定义HandlerMethodArgumentResolver集合
 	@Nullable
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
 	@Nullable
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
+	//自定义HandlerMethodReturnValueHandler集合
 	@Nullable
 	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 
 	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
+	//Http消息转换器
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
@@ -98,9 +101,11 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	@Nullable
 	private ApplicationContext applicationContext;
 
+	//缓存，key一般存储Controller，value是ExceptionHandlerMethodResolver
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
 
+	//缓存，key存储ControllerAdviceBean，value是ExceptionHandlerMethodResolver
 	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<>();
 
@@ -276,6 +281,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			return;
 		}
 
+		/**
+		 * 获取spring容器中所有被@ControllerAdvice注解注释的bean的集合，然后遍历放入this.exceptionHandlerAdviceCache缓存中
+		 */
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		AnnotationAwareOrderComparator.sort(adviceBeans);
 
@@ -319,6 +327,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	/**
 	 * Return the list of argument resolvers to use including built-in resolvers
 	 * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
+	 * 默认的HandlerMethodArgumentResolver集合
 	 */
 	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
@@ -344,6 +353,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	/**
 	 * Return the list of return value handlers to use including built-in and
 	 * custom handlers provided via {@link #setReturnValueHandlers}.
+	 * 默认的HandlerMethodReturnValueHandler集合
 	 */
 	protected List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
@@ -384,11 +394,16 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
 			HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
 
+		//得到ServletInvocableHandlerMethod这个HandlerMethod中的Method是处理异常的方法
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {
 			return null;
 		}
 
+		/**
+		 * 给ServletInvocableHandlerMethod注入HandlerMethodArgumentResolverComposite和
+		 * HandlerMethodReturnValueHandlerComposite，主要就是为了处理HandlerMethod中方法的参数以及HandlerMethod的返回值
+		 */
 		if (this.argumentResolvers != null) {
 			exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		}
@@ -404,6 +419,10 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				logger.debug("Using @ExceptionHandler " + exceptionHandlerMethod);
 			}
 			Throwable cause = exception.getCause();
+			/**
+			 * ServletInvocableHandlerMethod调用invokeAndHandle方法对参数和返回值进行处理，通过ModelAndViewContainer作为
+			 * 中间变量将一些视图名，参数丢入到ModelAndViewContainer中
+			 */
 			if (cause != null) {
 				// Expose cause as provided argument as well
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
@@ -423,6 +442,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			return null;
 		}
 
+		//通过ModelAndViewContainer中间变量处理结果
 		if (mavContainer.isRequestHandled()) {
 			return new ModelAndView();
 		}
@@ -464,9 +484,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			handlerType = handlerMethod.getBeanType();
 			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
 			if (resolver == null) {
+				/**
+				 * 没有缓存，就创建一个ExceptionHandlerMethodResolver对象，并添加到exceptionHandlerCache缓存中，在ExceptionHandlerMethodResolver构造方法中，
+				 * 把带有注解@ExceptionHandler(这些带有@ExceptionHander注解的方法即属于异常处理方法)并且属于handlerType的方法过滤出来，
+				 * 并以异常Throwable为key，method为value丢入ExceptionHandlerMethodResolver对象的属性mappedMethods中
+				 */
 				resolver = new ExceptionHandlerMethodResolver(handlerType);
 				this.exceptionHandlerCache.put(handlerType, resolver);
 			}
+			//通过ExceptionHandlerMethodResolver的resolveMethod方法得到Method，这个Method就是处理异常的那个Method
 			Method method = resolver.resolveMethod(exception);
 			if (method != null) {
 				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
@@ -478,10 +504,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 		}
 
+		/***
+		 * 如果没有找到处理异常的方法，那么从exceptionHandlerAdviceCache缓存中拿，这个缓存是根据@ControllerAdvice注解得到的
+		 */
 		for (Map.Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
 			ControllerAdviceBean advice = entry.getKey();
 			if (advice.isApplicableToBeanType(handlerType)) {
 				ExceptionHandlerMethodResolver resolver = entry.getValue();
+				//通过ExceptionHandlerMethodResolver的resolveMethod方法得到Method，这个Method就是处理异常的那个Method
 				Method method = resolver.resolveMethod(exception);
 				if (method != null) {
 					return new ServletInvocableHandlerMethod(advice.resolveBean(), method);

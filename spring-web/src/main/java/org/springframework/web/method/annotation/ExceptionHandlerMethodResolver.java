@@ -45,6 +45,7 @@ public class ExceptionHandlerMethodResolver {
 
 	/**
 	 * A filter for selecting {@code @ExceptionHandler} methods.
+	 * 带有@ExceptionHandler注解的方法集合，这些方法属于异常处理方法
 	 */
 	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
 			AnnotatedElementUtils.hasAnnotation(method, ExceptionHandler.class);
@@ -60,8 +61,10 @@ public class ExceptionHandlerMethodResolver {
 	 * @param handlerType the type to introspect
 	 */
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
+		//从所有带有@ExceptionHandler注解的方法(这些方法属于异常处理方法)中过滤出属于handlerType的方法集合
 		for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {
 			for (Class<? extends Throwable> exceptionType : detectExceptionMappings(method)) {
+				//以异常Throwable为key，method为value丢入缓存this.mappedMethods中
 				addExceptionMapping(exceptionType, method);
 			}
 		}
@@ -75,8 +78,10 @@ public class ExceptionHandlerMethodResolver {
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
 		List<Class<? extends Throwable>> result = new ArrayList<>();
+		//将方法Method上带有@ExceptionHandler注解的value值取出来转换为class集合，放入result中
 		detectAnnotationExceptionMappings(method, result);
 		if (result.isEmpty()) {
+			//如果result为空，那么取方法method中所有入参中属于Throwable子类的入参Class放入result中
 			for (Class<?> paramType : method.getParameterTypes()) {
 				if (Throwable.class.isAssignableFrom(paramType)) {
 					result.add((Class<? extends Throwable>) paramType);
@@ -89,6 +94,11 @@ public class ExceptionHandlerMethodResolver {
 		return result;
 	}
 
+	/**
+	 * 将方法Method上带有@ExceptionHandler注解的value值取出来转换为list集合，放入result中
+	 * @param method
+	 * @param result
+	 */
 	private void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
 		ExceptionHandler ann = AnnotatedElementUtils.findMergedAnnotation(method, ExceptionHandler.class);
 		Assert.state(ann != null, "No ExceptionHandler annotation");
