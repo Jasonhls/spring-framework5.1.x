@@ -527,6 +527,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 
 		try {
+			//启动创建SpringMvc的子容器
 			this.webApplicationContext = initWebApplicationContext();
 			initFrameworkServlet();
 		}
@@ -559,7 +560,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	protected WebApplicationContext initWebApplicationContext() {
 		/**
-		 * 从ServletContext对象中获取到Spring root 上下文对象,为啥可以获取,
+		 * 从ServletContext对象中获取到Spring root 上下文对象(即SpringMvc的父容器，即根容器)，为啥可以获取,
 		 * 因为我们在Spring 根容器上下文创建成功后放入到了ServletContext中，这个代码在
 		 * ContextLoaderListener的contextInitialized方法中，tomcat容器启动中，会调用
 		 * Listener的初始化方法
@@ -569,7 +570,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		WebApplicationContext wac = null;
 
 		/**
-		 * webApplicationContext对象是在创建DispatcherServlet对象的时候,存放进来的一个springmvc web的上下文对象
+		 * webApplicationContext对象是在创建DispatcherServlet对象的时候,存放进来的一个SpringMvc web的上下文对象
 		 */
 		if (this.webApplicationContext != null) {
 			//如果是通过构造函数注入的，这里的this.webApplicationContext就不会为空
@@ -585,12 +586,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 						// The context instance was injected without an explicit parent -> set
 						// the root application context (if any; may be null) as the parent
 						/**
-						 * cwac子容器，rootContext父容器，这里子容器将父容器设置为parent
+						 * cwac是SpringMvc子容器，rootContext是SpringMvc的父容器，这里子容器将父容器设置为parent
 						 */
 						cwac.setParent(rootContext);
 					}
 					/**
-					 * 作为SpringMvc 上下文刷新
+					 * 配置刷新SpringMvc的子容器
 					 */
 					configureAndRefreshWebApplicationContext(cwac);
 				}
