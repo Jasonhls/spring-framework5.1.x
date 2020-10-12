@@ -63,6 +63,8 @@ public class ExceptionHandlerMethodResolver {
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
 		//从所有带有@ExceptionHandler注解的方法(这些方法属于异常处理方法)中过滤出属于handlerType的方法集合
 		for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {
+			//detectExceptionMappings方法会对method进行过滤，过滤出带有注解@ExceptionHandler，并且@ExceptionHandler注解的value值是Throwable的子类的class的集合
+			//以这些过滤出的Throwable的Class为key，该方法method为value，存到ExceptionHandlerMethodResolver的属性mappedMethods中
 			for (Class<? extends Throwable> exceptionType : detectExceptionMappings(method)) {
 				//以异常Throwable为key，method为value丢入缓存this.mappedMethods中
 				addExceptionMapping(exceptionType, method);
@@ -158,6 +160,12 @@ public class ExceptionHandlerMethodResolver {
 	 */
 	@Nullable
 	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
+		/**
+		 *this.exceptionLookupCache是在ExceptionHandlerExceptionResolver的afterPropertiesSet方法中创建ExceptionHandlerMethodResolver对象的时候，
+		 * 在ExceptionHandlerMethodResolver的构造函数ExceptionHandlerMethodResolver(Class<?> handlerType)中
+		 * 会向this.exceptionLookupCache中添加缓存 ，以@ExceptionHandler注解中的value的异常Class为key，value为@ExceptionHandler注解标注的方法
+		 */
+
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);

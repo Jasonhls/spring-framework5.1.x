@@ -292,6 +292,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			if (beanType == null) {
 				throw new IllegalStateException("Unresolvable type for ControllerAdviceBean: " + adviceBean);
 			}
+			//创建ExceptionHandlerMethodResolver对象，并添加到缓存this.exceptionHandlerAdviceCache中
+			//以ControllerAdviceBean为key，新创建一个ExceptionHandlerMethodResolver对象作为值，这里的beanType就是被@ControllerAdvice注解注释的类对应的beanType
+			//这里会把异常(作为key)和处理异常的方法(作为value)添加到ExceptionHandlerMethodResolver的属性mappedMethods中
 			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
 			if (resolver.hasExceptionMappings()) {
 				this.exceptionHandlerAdviceCache.put(adviceBean, resolver);
@@ -394,7 +397,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
 			HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
 
-		//得到ServletInvocableHandlerMethod这个HandlerMethod中的Method是处理异常的方法
+		//得到ServletInvocableHandlerMethod这个exceptionHandlerMethod中的Method是处理异常的方法
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {
 			return null;
@@ -425,10 +428,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			 */
 			if (cause != null) {
 				// Expose cause as provided argument as well
+				//方法反射，执行异常处理方法
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
 			}
 			else {
 				// Otherwise, just the given exception as-is
+				//方法反射，执行异常处理方法
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
 			}
 		}
@@ -505,7 +510,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 
 		/***
-		 * 如果没有找到处理异常的方法，那么从exceptionHandlerAdviceCache缓存中拿，这个缓存是根据@ControllerAdvice注解得到的
+		 * 如果没有找到处理异常的方法，那么从exceptionHandlerAdviceCache缓存中拿，这个缓存是在ExceptionHandlerExceptionResolver的afterPropertiesSet方法中添加缓存的
 		 */
 		for (Map.Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
 			ControllerAdviceBean advice = entry.getKey();
