@@ -311,7 +311,12 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @Import annotations
-		//如果该类中带有@Import注解，解析该注解的属性值
+		/**
+		 *如果该类中带有@Import注解，解析该注解的属性值 ，
+		 * getImports(sourceClass)就是获取sourceClass中所有@Import的注解信息，包括@Import注解的value对应的Class信息
+		 * 比如@EnableWebMvc，这个注解中含有@Import注解，因此会去解析其中包含的Class是DelegatingWebMvcConfiguration.class，
+		 * 会将这个Class作为参数构造成SourceClass对象，并添加到集合中返回
+		 */
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
 		// Process any @ImportResource annotations
@@ -525,11 +530,14 @@ class ConfigurationClassParser {
 
 	/**
 	 * Returns {@code @Import} class, considering all meta-annotations.
+	 * 解析sourceClass中所有带有@Import注解的注解信息，@Import的value对应的Class作为入参构造成SourceClass对象并添加到imports集合中
 	 */
 	private Set<SourceClass> getImports(SourceClass sourceClass) throws IOException {
 		Set<SourceClass> imports = new LinkedHashSet<>();
 		Set<SourceClass> visited = new LinkedHashSet<>();
-		//找出配置类中的@Import注解中的class集合并返回
+		/**
+		 *找出配置类中的@Import注解中的class集合并返回
+		 */
 		collectImports(sourceClass, imports, visited);
 		return imports;
 	}
@@ -553,10 +561,14 @@ class ConfigurationClassParser {
 		if (visited.add(sourceClass)) {
 			for (SourceClass annotation : sourceClass.getAnnotations()) {
 				String annName = annotation.getMetadata().getClassName();
+				//如果不是@Import注解，就递归执行collectImports方法
 				if (!annName.equals(Import.class.getName())) {
 					collectImports(annotation, imports, visited);
 				}
 			}
+			/**
+			 *获取sourceClass中所有的@Import注解中的value值，然后根据value的class，去创建SourceClass对象，然后添加到imports集合中
+			 */
 			imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(), "value"));
 		}
 	}
@@ -1074,6 +1086,9 @@ class ConfigurationClassParser {
 			String[] classNames = (String[]) annotationAttributes.get(attribute);
 			Set<SourceClass> result = new LinkedHashSet<>();
 			for (String className : classNames) {
+				/**
+				 * 根据className进行反射得到字节码Class，然后用Class去创建SourceClass对象，添加到result中
+				 */
 				result.add(getRelated(className));
 			}
 			return result;
