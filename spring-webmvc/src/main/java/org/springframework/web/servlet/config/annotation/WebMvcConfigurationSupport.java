@@ -170,6 +170,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @since 3.1
  * @see EnableWebMvc
  * @see WebMvcConfigurer
+ * 由于WebMvcConfigurationSupport的子类DelegatingWebMvcConfiguration是配置类，因此WebMvcConfigurationSupport也是配置类
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
@@ -193,6 +194,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
 		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+		/**
+		 * 是否含有com.fasterxml.jackson.databind.ObjectMapper类和com.fasterxml.jackson.core.JsonGenerator类
+		 * 即必须引入json相关的jar才有这两个类，即需要引入jackson-core包和jackson-databind包
+		 */
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
@@ -561,6 +566,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setContentNegotiationManager(mvcContentNegotiationManager());
+		/**
+		 *RequestMappingHandlerAdapter中添加默认的Http消息转换器
+		 */
 		adapter.setMessageConverters(getMessageConverters());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setCustomArgumentResolvers(getArgumentResolvers());
@@ -745,6 +753,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			this.messageConverters = new ArrayList<>();
 			configureMessageConverters(this.messageConverters);
 			if (this.messageConverters.isEmpty()) {
+				//给RequestMappingHandlerAdapter对象添加默认的HttpMessageConverters，http消息转换器
 				addDefaultHttpMessageConverters(this.messageConverters);
 			}
 			extendMessageConverters(this.messageConverters);
@@ -811,6 +820,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
 
+		//如果需要把结果转换为json串，那么需要添加MappingJackson2HttpMessageConverter（转换json串用的http消息转换器）
 		if (jackson2Present) {
 			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
 			if (this.applicationContext != null) {

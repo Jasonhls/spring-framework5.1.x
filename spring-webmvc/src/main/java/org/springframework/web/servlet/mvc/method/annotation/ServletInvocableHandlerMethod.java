@@ -121,6 +121,20 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		mavContainer.setRequestHandled(false);
 		Assert.state(this.returnValueHandlers != null, "No return value handlers");
 		try {
+			/**
+			 * 利用返回值处理器对返回值进行处理，this.returnValueHandlers在RequestMappingHandlerAdapter的afterPropertiesSet方法中，
+			 * 对RequestMappingHandlerAdapter的属性returnValueHandlers（即HandlerMethodReturnValueHandlerComposite对象）进行初始化的，
+			 * 然后在DispatcherServlet的doDispatcher方法中，mv = ha.handle(processedRequest, response, mappedHandler.getHandler())
+			 * --->AbstractHandlerMethodAdapter的handleInternal方法--->RequestMappingHandlerAdapter的invokeHandlerMethod方法
+			 * 该方法中会创建一个ServletInvocableHandlerMethod对象，然后把RequestMappingHandlerAdapter对象的属性returnValueHandlers赋给
+			 * ServletInvocableHandlerMethod的属性returnValueHandlers（即HandlerMethodReturnValueHandlerComposite对象）
+			 * --->ServletInvocableHandlerMethod的invokeAndHandle方法
+			 * 因此这里的this.returnValueHandlers即RequestMappingHandlerAdapter对象的属性returnValueHandlers(HandlerMethodReturnValueHandlerComposite对象，
+			 * 该对象的属性List<HandlerMethodReturnValueHandler> returnValueHandlers也被初始化了)
+			 *
+			 * 利用返回值处理器对返回值进行处理
+			 */
+
 			this.returnValueHandlers.handleReturnValue(
 					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
 		}
