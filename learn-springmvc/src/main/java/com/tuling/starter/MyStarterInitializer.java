@@ -16,7 +16,7 @@ public class MyStarterInitializer extends AbstractAnnotationConfigDispatcherServ
 	 */
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
-		return new Class[]{RootConfig.class};
+		return new Class<?>[]{RootConfig.class};
 	}
 
 	/**
@@ -25,7 +25,7 @@ public class MyStarterInitializer extends AbstractAnnotationConfigDispatcherServ
 	 */
 	@Override
 	protected Class<?>[] getServletConfigClasses() {
-		return new Class[]{WebAppConfig.class};
+		return new Class<?>[]{WebAppConfig.class};
 	}
 
 	/**

@@ -41,6 +41,3 @@ rootProject.children.each {project ->
 include 'learn-ioc'
 include 'learn-springmvc'
 include 'learn-spi'
-include 'learn-springconfig'
-include 'learn-springxml'
-
