@@ -431,7 +431,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			//调用后置处理器的postProcessAfterInitialization方法
+			/**
+			 *	遍历调用后置处理器的postProcessAfterInitialization方法
+			 * 比如ApplicationListenerDetector，这个BeanPostProcessor处理器的作用就是将ApplicationListener添加到
+			 * AbstractApplicationContext的属性applicationEventMulticaster即ApplicationEventMulticaster对象
+			 * 的属性defaultRetriever即ListenerRetriever对象的属性applicationListeners中
+			 */
+
 			Object current = processor.postProcessAfterInitialization(result, beanName);
 			if (current == null) {
 				return result;
@@ -1823,7 +1829,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
-			//调用我们的bean的后置处理器的postProcessAfterInitialization方法
+			/**
+			 * 调用我们的bean的后置处理器的postProcessAfterInitialization方法
+			 * 比如ApplicationListenerDetector
+			 */
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 

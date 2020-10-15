@@ -400,6 +400,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.earlyApplicationEvents.add(applicationEvent);
 		}
 		else {
+			/**
+			 * 这里getApplicationEventMulticaster()方法获取的this.applicationEventMulticaster是在方法refresh()的initApplicationEventMulticaster()方法中创建的，
+			 * 没有自定义事件广播器，就默认使用SimpleApplicationEventMulticaster对象
+			 */
 			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
 		}
 
@@ -778,6 +782,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initApplicationEventMulticaster() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		//判断用户是否有自定义的事件广播器，如果有自定义的使用自定义的
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -786,6 +791,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		else {
+			//如果用户没有自定义事件广播器，那么使用默认的，即SimpleApplicationEventMulticaster
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
 			if (logger.isTraceEnabled()) {
@@ -838,12 +844,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void registerListeners() {
 		// Register statically specified listeners first.
+		/**
+		 * 硬编码方式注册的监听器处理
+		 */
 		for (ApplicationListener<?> listener : getApplicationListeners()) {
 			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
+		/**
+		 * 配置文件注册的监听器处理
+		 *把ApplicationListener的beanName全部找出来，然后把这些beanNames放入AbstractApplicationContext的属性applicationEventMulticaster即ApplicationEventMulticaster对象的
+		 * 属性defaultRetriever即ListenerRetriever对象的属性applicationListenerBeans集合中，这些只是保存这些ApplicationListener的beanName，他们的实例化在
+		 * AbstractApplicationContext的refresh方法的代码行finishBeanFactoryInitialization方法中的getBean方法的逻辑中
+		 */
+
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
 		for (String listenerBeanName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);

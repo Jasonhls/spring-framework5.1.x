@@ -191,7 +191,12 @@ public abstract class AbstractApplicationEventMulticaster
 				if (retriever != null) {
 					return retriever.getApplicationListeners();
 				}
+				//如果retriever对象为空，那么就新创建一个ListenerRetriever对象
 				retriever = new ListenerRetriever(true);
+				/**
+				 * 获取存放在AbstractApplicationContext的属性applicationEventMulticaster的属性defaultRetriever的属性applicationListeners中的ApplicationListener对象，
+				 * 并将它们存放到新创建的ListenerRetriever对象中
+				 */
 				Collection<ApplicationListener<?>> listeners =
 						retrieveApplicationListeners(eventType, sourceType, retriever);
 				this.retrieverCache.put(cacheKey, retriever);
