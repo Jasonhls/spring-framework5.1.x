@@ -809,6 +809,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void initLifecycleProcessor() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
+			/**
+			 * 将BeanFactory中自定义的LifecycleProcessor赋给AbstractApplicationContext的属性lifecycleProcessor
+			 */
 			this.lifecycleProcessor =
 					beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
 			if (logger.isTraceEnabled()) {
@@ -816,6 +819,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		else {
+			/**
+			 * 没有自定义的LifecycleProcessor，就是用默认的
+			 */
 			DefaultLifecycleProcessor defaultProcessor = new DefaultLifecycleProcessor();
 			defaultProcessor.setBeanFactory(beanFactory);
 			this.lifecycleProcessor = defaultProcessor;
@@ -926,6 +932,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Propagate refresh to lifecycle processor first.
 		//调用生命周期的onRefresh方法
+		//通过LifecycleProcessor来执行Lifecycle实现类的start方法
 		getLifecycleProcessor().onRefresh();
 
 		// Publish the final event.

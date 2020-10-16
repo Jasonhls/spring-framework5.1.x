@@ -138,13 +138,20 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	// Internal helpers
 
 	private void startBeans(boolean autoStartupOnly) {
+		//取得所有Lifecycle接口实例，此map的key为beanName，value是bean实例
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<>();
 		lifecycleBeans.forEach((beanName, bean) -> {
+			/**
+			 * 如果autoStartupOnly为true，bean必须实现SmartLifecycle接口，并且该bean的isAutoStartup()方法必须返回true，否则不会被加入到LifecycleGroup中
+			 */
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
 				int phase = getPhase(bean);
 				LifecycleGroup group = phases.get(phase);
 				if (group == null) {
+					/**
+					 * 把Lifecycle的实例集合cycleBeans赋给了LifecycleGroup对象的属性lifecycleBeans
+					 */
 					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
 					phases.put(phase, group);
 				}
@@ -155,6 +162,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			List<Integer> keys = new ArrayList<>(phases.keySet());
 			Collections.sort(keys);
 			for (Integer key : keys) {
+				/**
+				 * 遍历phases，取出LifecycleGroup对象，然后执行 LifecycleGroup的start方法，该方法会遍历LifecycleGroup中的lifecycleBeans，执行Lifecycle实例的start方法
+				 */
 				phases.get(key).start();
 			}
 		}
