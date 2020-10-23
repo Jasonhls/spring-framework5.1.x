@@ -85,6 +85,10 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
+			/**
+			 * 这里的delegate如果是自定义的WebMvcConfigurerAdapter，
+			 * 就会执行自定义WebMvcConfigurerAdapter的添加拦截器的方法
+			 */
 			delegate.addInterceptors(registry);
 		}
 	}

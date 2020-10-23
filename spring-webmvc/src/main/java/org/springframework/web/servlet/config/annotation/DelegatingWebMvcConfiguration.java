@@ -45,6 +45,10 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
 
 
+	/**
+	 * @Autowired标注在方法上，会在refresh方法的实例化DelegatingWebMvcConfiguration这个bean的过程中，会被解析，然后执行，populate方法中执行，依赖注入的一种方式
+	 * @param configurers
+	 */
 	@Autowired(required = false)
 	public void setConfigurers(List<WebMvcConfigurer> configurers) {
 		if (!CollectionUtils.isEmpty(configurers)) {
