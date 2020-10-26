@@ -487,6 +487,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 					//判断该注解是否是必须的
 					boolean required = determineRequiredStatus(ann);
+					/**
+					 * 获取属性描述器
+					 */
 					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}
@@ -683,10 +686,16 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				TypeConverter typeConverter = beanFactory.getTypeConverter();
 				for (int i = 0; i < arguments.length; i++) {
 					MethodParameter methodParam = new MethodParameter(method, i);
+					/**
+					 * 创建依赖属性描述器
+					 */
 					DependencyDescriptor currDesc = new DependencyDescriptor(methodParam, this.required);
 					currDesc.setContainingClass(bean.getClass());
 					descriptors[i] = currDesc;
 					try {
+						/**
+						 * 获取注入方法的参数
+						 */
 						Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeans, typeConverter);
 						if (arg == null && !this.required) {
 							arguments = null;

@@ -173,6 +173,9 @@ public final class CachedIntrospectionResults {
 			return results;
 		}
 
+		/**
+		 * 该构造方法中，会获取属性描述器并存放到缓存中
+		 */
 		results = new CachedIntrospectionResults(beanClass);
 		ConcurrentMap<Class<?>, CachedIntrospectionResults> classCacheToUse;
 
@@ -243,6 +246,12 @@ public final class CachedIntrospectionResults {
 				return beanInfo;
 			}
 		}
+		/**
+		 *获取bean的信息，会调用到Introspector的getBeanInfo()方法，该方法会调用到Introspector的getTargetPropertyInfo()方法，
+		 * 该方法会反射获取beanClass中所有的方法，然后判断是不是is，get，set开头的，然后根据参数个数和方法返回值类型去做判断，
+		 * 获取到beanInfo的信息
+		 */
+
 		return (shouldIntrospectorIgnoreBeaninfoClasses ?
 				Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :
 				Introspector.getBeanInfo(beanClass));
@@ -269,6 +278,7 @@ public final class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
+			//获取beanClass对应的bean信息
 			this.beanInfo = getBeanInfo(beanClass);
 
 			if (logger.isTraceEnabled()) {

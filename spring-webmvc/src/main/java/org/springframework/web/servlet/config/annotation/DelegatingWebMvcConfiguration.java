@@ -46,7 +46,12 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 
 	/**
-	 * @Autowired标注在方法上，会在refresh方法的实例化DelegatingWebMvcConfiguration这个bean的过程中，会被解析，然后执行，populate方法中执行，依赖注入的一种方式
+	 * @Autowired标注在方法上，会在refresh方法的实例化DelegatingWebMvcConfiguration这个bean的过程中，会被解析，然后执行，
+	 * 在AbstractAutowireCapableBeanFactory的doCreateBean方法中先通过AutowiredAnnotationBeanPostProcessor预先解析@Autowired的信息，
+	 * 然后通过populate方法中执行依赖注入
+	 * 注意：@Autowired和@Value进行依赖注入属性，即可标注在属性上，又可标注在方法上
+	 * 因此在DelegatingWebMvcConfiguration的getBean方法中，会调用下面这个方法，下面这个方法会把自定义的配置文件添加到
+	 * WebMvcConfigurerComposite类的delegates属性（该属性是List<WebMvcConfigurer>）中了
 	 * @param configurers
 	 */
 	@Autowired(required = false)
@@ -84,6 +89,9 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 	@Override
 	protected void addInterceptors(InterceptorRegistry registry) {
+		/**
+		 * 添加拦截器
+		 */
 		this.configurers.addInterceptors(registry);
 	}
 

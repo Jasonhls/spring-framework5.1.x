@@ -455,6 +455,7 @@ public abstract class BeanUtils {
 	@Nullable
 	public static PropertyDescriptor findPropertyForMethod(Method method, Class<?> clazz) throws BeansException {
 		Assert.notNull(method, "Method must not be null");
+		//获取属性描述器
 		PropertyDescriptor[] pds = getPropertyDescriptors(clazz);
 		for (PropertyDescriptor pd : pds) {
 			if (method.equals(pd.getReadMethod()) || method.equals(pd.getWriteMethod())) {

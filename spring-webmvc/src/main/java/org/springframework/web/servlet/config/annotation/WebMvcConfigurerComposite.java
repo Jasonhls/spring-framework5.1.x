@@ -88,6 +88,11 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 			/**
 			 * 这里的delegate如果是自定义的WebMvcConfigurerAdapter，
 			 * 就会执行自定义WebMvcConfigurerAdapter的添加拦截器的方法
+			 *
+			 * 这里的this.delegates是怎样初始化的?
+			 * 因为DelegatingWebMvcConfiguration类中有@Autowired注解标注在方法setConfigurers(List<WebMvcConfigurer> configurers) 上，
+			 * 在DelegatingWebMvcConfiguration的getBean()方法中会解析@Autowired注解，并进行依赖注入，执行setConfigurers方法，然后该方法就会给
+			 * WebMvcConfigurerComposite的属性delegates进行初始化
 			 */
 			delegate.addInterceptors(registry);
 		}
