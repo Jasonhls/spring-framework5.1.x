@@ -52,6 +52,9 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	 * 注意：@Autowired和@Value进行依赖注入属性，即可标注在属性上，又可标注在方法上
 	 * 因此在DelegatingWebMvcConfiguration的getBean方法中，会调用下面这个方法，下面这个方法会把自定义的配置文件添加到
 	 * WebMvcConfigurerComposite类的delegates属性（该属性是List<WebMvcConfigurer>）中了
+	 *
+	 * 下面这个方法，会在getBean方法的populate方法中在注入依赖的时候，会去寻找该方法的入参类型即org.springframework.web.servlet.config.annotation.WebMvcConfigurer，
+	 * 然后去spring容器中寻找所有该类型的bean的集合，然后加入进来
 	 * @param configurers
 	 */
 	@Autowired(required = false)
