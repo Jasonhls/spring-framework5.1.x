@@ -284,11 +284,13 @@ public class ContextLoader {
 			 */
 			if (this.context == null) {
 				/**
-				 * 由于xml版本中的context为空，所以这里需要创建我们的根容器
+				 * 如果是xml配置方式，那么this.context会为空，前面不会设置this.context（如果java config配置方式前面才会设置），
+				 * 所以如果是Xml配置方式，那这里需要创建我们的根容器
 				 */
 				this.context = createWebApplicationContext(servletContext);
 			}
-			//java配置方式的创建的context为ConfigurableWebApplicationContext对象，会走下面的流程
+			//java配置方式创建的context为AnnotationConfigWebApplicationContext，是接口ConfigurableWebApplicationContext的子类，会走下面的流程
+			//Xml配置方式创建的context为XmlWebApplicationContext，也是接口ConfigurableWebApplicationContext的子类，也会走下面的流程。
 			if (this.context instanceof ConfigurableWebApplicationContext) {
 				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) this.context;
 				//判断ConfigurableWebApplicationContext 配置上下文版本的是不是激活了，即有没有去调用refresh方法
