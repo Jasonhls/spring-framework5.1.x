@@ -422,7 +422,9 @@ public class ContextLoader {
 			((ConfigurableWebEnvironment) env).initPropertySources(sc, null);
 		}
 
-		//定制spring上下文对象
+		/**
+		 *定制spring上下文对象，这里可以对Spring上下文对象(即ApplicationContext)进行扩展
+		 */
 		customizeContext(sc, wac);
 		/**
 		 * 会触发IOC根容器的 刷新
@@ -465,6 +467,15 @@ public class ContextLoader {
 		}
 
 		AnnotationAwareOrderComparator.sort(this.contextInitializers);
+		/**
+		 * 执行ApplicationContextInitializer接口的initialize方法
+		 * 可以自定义ApplicationContextInitializer接口，对spring上下文进行扩展，具体有三种扩展方式如下：
+		 * （1）在启动类中用springApplication.addInitializers(new TestApplicationContextInitializer())语句加入
+		 * （2）配置文件配置
+		 * 	context.initializer.classes=com.example.demo.TestApplicationContextInitializer
+		 * （3）Spring SPI扩展，在spring.factories中加入
+		 * 	org.springframework.context.ApplicationContextInitializer=com.example.demo.TestApplicationContextInitializer
+		 */
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
 			initializer.initialize(wac);
 		}
