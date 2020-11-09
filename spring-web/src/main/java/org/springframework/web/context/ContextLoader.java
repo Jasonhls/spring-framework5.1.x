@@ -276,7 +276,7 @@ public class ContextLoader {
 			// Store context in local instance variable, to guarantee that
 			// it is available on ServletContext shutdown.
 			/**
-			 * this.context是在调用ontextLoaderListener有参构造器的时候set进去的，
+			 * this.context是在调用ContextLoaderListener有参构造器的时候set进去的，
 			 * 为AnnotationConfigWebApplicationContext对象
 			 * 如果这里的context为空，表明是xml方式，xml方式会调用ContextLoaderListener的
 			 * 无参构造器，那么this.context就没有设置，为空
