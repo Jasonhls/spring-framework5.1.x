@@ -590,6 +590,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					//MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition
 					//第3次调用后置处理器
 					//AutowiredAnnotationBeanPostProcessor 预解析@Autowired和@Value，封装到InjectionMetadata，
+					//同理CommonAnnotationBeanPostProcessor 预解析@Resource，封装到InjectionMetadata，
 					// 这里只是预解析@Autowired、@Value注解信息，不会把真正的值赋值给这些被@Autowired和@Value注释的字段或方法
 					//执行属于MergedBeanDefinitionPostProcessor的BeanPostProcessor处理器
 					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
@@ -1112,7 +1113,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (BeanPostProcessor bp : getBeanPostProcessors()) {
 			if (bp instanceof MergedBeanDefinitionPostProcessor) {
 				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
-				//如果AutowiredAnnotationBeanPostProcessor处理器，则会预解析@Autowired和@Value，封装注入到InjectionMetadata
+				/**
+				 * 如果AutowiredAnnotationBeanPostProcessor处理器，则会预解析@Autowired和@Value，封装注入到InjectionMetadata
+				 *如果是CommonAnnotationBeanPostProcessor处理器，则会解析被注解@Resource标注的属性
+				 */
 				bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
 			}
 		}
@@ -1454,7 +1458,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
-					//这里如果是AutowiredAnnotationBeanPostProcessor，就会解析@Autowired、@Value注解
+					/**
+					 * 这里如果是AutowiredAnnotationBeanPostProcessor，就会解析@Autowired、@Value注解
+					 *如果是CommonAnnotationBeanPostProcessor，就会解析@Resource注解
+					 */
 					PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 					if (pvsToUse == null) {
 						if (filteredPds == null) {

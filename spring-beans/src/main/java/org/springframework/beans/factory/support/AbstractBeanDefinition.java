@@ -173,7 +173,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private String[] dependsOn;
 
 	/**
-	 * autowire-candidata属性设置为false，这样容器在查找自动装配对象时，将不考虑该bean，
+	 * autowire-candidate属性设置为false，这样容器在查找自动装配对象时，将不考虑该bean，
 	 * 即它不会被考虑作为其他bean自动装配的候选者，但是该bean本身还是可以使用自动装配来注入其他bean的
 	 * 对应bean属性autowire-candidate
 	 */
