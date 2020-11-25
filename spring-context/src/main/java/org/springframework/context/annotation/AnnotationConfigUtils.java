@@ -154,6 +154,7 @@ public abstract class AnnotationConfigUtils {
 				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 			}
 			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+				//添加ContextAnnotationAutowireCandidateResolver，是QualifierAnnotationAutowireCandidateResolver的子类，会处理@Qualifier注解
 				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 			}
 		}

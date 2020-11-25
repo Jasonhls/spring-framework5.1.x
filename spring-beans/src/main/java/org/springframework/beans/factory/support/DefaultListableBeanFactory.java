@@ -749,6 +749,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		String beanDefinitionName = BeanFactoryUtils.transformedBeanName(beanName);
 		if (containsBeanDefinition(beanDefinitionName)) {
+			//这里会判断是否带有@Qualifier注解
 			return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanDefinitionName), descriptor, resolver);
 		}
 		else if (containsSingleton(beanName)) {
@@ -786,6 +787,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (mbd.isFactoryMethodUnique && mbd.factoryMethodToIntrospect == null) {
 			new ConstructorResolver(this).resolveFactoryMethodIfPossible(mbd);
 		}
+		//这里的resolver为ContextAnnotationAutowireCandidateResolver，即QualifierAnnotationAutowireCandidateResolver的子类
+		//QualifierAnnotationAutowireCandidateResolver会解析是否带有@Qualifier注解
 		return resolver.isAutowireCandidate(
 				new BeanDefinitionHolder(mbd, beanName, getAliases(beanDefinitionName)), descriptor);
 	}
@@ -1207,6 +1210,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					descriptor, requestingBeanName);
 			if (result == null) {
 				//解析依赖
+				//这里面会判断是否带有@Qualifier注解
 				result = doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
 			}
 			return result;
@@ -1251,6 +1255,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return multipleBeans;
 			}
 
+			//这里会判断是否带有@Qualifier注解
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (isRequired(descriptor)) {
@@ -1467,6 +1472,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		for (String candidate : candidateNames) {
+			//isAutowireCandidate方法会判断是否带有@Qualifier注解
 			if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
 				addCandidateEntry(result, candidate, descriptor, requiredType);
 			}

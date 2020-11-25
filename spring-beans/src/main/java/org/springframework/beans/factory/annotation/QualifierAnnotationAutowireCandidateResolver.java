@@ -141,11 +141,13 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * fallback to match against the bean name or an alias if a qualifier or
 	 * attribute does not match.
 	 * @see Qualifier
+	 * 判断是否带有@Qualifier注解的
 	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		boolean match = super.isAutowireCandidate(bdHolder, descriptor);
 		if (match) {
+			//checkQualifiers方法中会判断是否带有@Qualifier注解
 			match = checkQualifiers(bdHolder, descriptor.getAnnotations());
 			if (match) {
 				MethodParameter methodParam = descriptor.getMethodParameter();
@@ -172,6 +174,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 			Class<? extends Annotation> type = annotation.annotationType();
 			boolean checkMeta = true;
 			boolean fallbackToMeta = false;
+			//isQualifier方法会判断是否带有@Qualifier注解
 			if (isQualifier(type)) {
 				if (!checkQualifier(bdHolder, annotation, typeConverter)) {
 					fallbackToMeta = true;
@@ -206,6 +209,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * Checks whether the given annotation type is a recognized qualifier type.
 	 */
 	protected boolean isQualifier(Class<? extends Annotation> annotationType) {
+		//在QualifierAnnotationAutowireCandidateResolver的无惨构造器中，会把Qualifier.class添加到this.qualifierTypes集合中
 		for (Class<? extends Annotation> qualifierType : this.qualifierTypes) {
 			if (annotationType.equals(qualifierType) || annotationType.isAnnotationPresent(qualifierType)) {
 				return true;

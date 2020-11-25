@@ -377,6 +377,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
 			//开始把值注入到属性中
+			//这里面会解析是否包含@Qualifier注解，@Autowired默认是根据type进行注入，如果还带有@Qualifier注解，则根据name进行注入，
+			// 即等同于@Resource(根据name进行注入的)
 			metadata.inject(bean, beanName, pvs);
 		}
 		catch (BeanCreationException ex) {
@@ -695,6 +697,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					try {
 						/**
 						 * 获取注入方法的参数
+						 * 这里会判断是否带有@Qualifier注解
 						 */
 						Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeans, typeConverter);
 						if (arg == null && !this.required) {
