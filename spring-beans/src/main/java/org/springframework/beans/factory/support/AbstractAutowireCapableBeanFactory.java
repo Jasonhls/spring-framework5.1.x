@@ -1459,6 +1459,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
 					/**
+					 * 执行InstantiationAwareBeanPostProcessor处理器的postProcessPropertyValues方法
 					 * 这里如果是AutowiredAnnotationBeanPostProcessor，就会解析@Autowired、@Value注解
 					 *如果是CommonAnnotationBeanPostProcessor，就会解析@Resource注解
 					 */

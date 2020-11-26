@@ -107,6 +107,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void testIncompleteBeanDefinition() {
+		//没有指定beanClass的BeanDefinition是没法创建bean实例的
 		bf.registerBeanDefinition("testBean", new GenericBeanDefinition());
 		try {
 			bf.getBean("testBean");
@@ -123,6 +124,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
 		TestBean tb = new TestBean();
+		//注册单例bean，因此注入到ResourceInjectionBean中的TestBean属于同一个对象
 		bf.registerSingleton("testBean", tb);
 
 		ResourceInjectionBean bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
@@ -174,6 +176,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("nestedTestBean", ntb);
 
 		TestBean tb = bf.getBean("testBean", TestBean.class);
+		//如果先获取annotatedBean的话，那么这个时候bf中还不存在单例TestBean，
+		// 那么单例annotatedBean注入属性testBean，testBean2，testBean3，testBean4，会先获取testBean的单例，并存入缓存中
 		TypedExtendedResourceInjectionBean bean = (TypedExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb, bean.getTestBean2());
@@ -183,6 +187,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bf, bean.getBeanFactory());
 
 		assertArrayEquals(new String[] {"testBean", "nestedTestBean"}, bf.getDependenciesForBean("annotatedBean"));
+		//摧毁单例TestBean，同时会摧毁所有依赖TestBean的单例
 		bf.destroySingleton("testBean");
 		assertFalse(bf.containsSingleton("testBean"));
 		assertFalse(bf.containsSingleton("annotatedBean"));
@@ -2245,6 +2250,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	static class NonPublicResourceInjectionBean<T> extends ResourceInjectionBean {
 
+		//通过属性注入
 		@Autowired
 		public final ITestBean testBean3 = null;
 
@@ -2265,6 +2271,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			super.setTestBean2(testBean2);
 		}
 
+		//通过方法注入
 		@Autowired
 		private void inject(ITestBean testBean4, T nestedTestBean) {
 			this.testBean4 = testBean4;

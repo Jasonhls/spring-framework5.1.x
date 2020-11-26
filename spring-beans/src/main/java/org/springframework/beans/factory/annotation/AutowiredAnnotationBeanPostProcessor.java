@@ -553,11 +553,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	/**
 	 * Register the specified bean as dependent on the autowired beans.
+	 * beanName为当前bean的beanName，autowiredBeanNames为当前bean所有依赖的bean的beanName集合
 	 */
 	private void registerDependentBeans(@Nullable String beanName, Set<String> autowiredBeanNames) {
 		if (beanName != null) {
 			for (String autowiredBeanName : autowiredBeanNames) {
 				if (this.beanFactory != null && this.beanFactory.containsBean(autowiredBeanName)) {
+					//往DefaultSingletonBeanRegistry的属性dependentBeanMap中添加值：循环把依赖bean的beanName作为key，当前bean的beanName添加value集合中
 					this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
 				}
 				if (logger.isTraceEnabled()) {
@@ -698,6 +700,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						/**
 						 * 获取注入方法的参数
 						 * 这里会判断是否带有@Qualifier注解
+						 * 这里会寻找依赖的bean，并会把这些依赖的bean的beanName放到autowiredBeans集合中
 						 */
 						Object arg = beanFactory.resolveDependency(currDesc, beanName, autowiredBeans, typeConverter);
 						if (arg == null && !this.required) {
@@ -715,6 +718,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						if (arguments != null) {
 							Object[] cachedMethodArguments = new Object[paramTypes.length];
 							System.arraycopy(descriptors, 0, cachedMethodArguments, 0, arguments.length);
+							/**
+							 * beanName当前bean的beanName，autowiredBeans为当前bean所有依赖bean的beanName集合
+							 *这里会往DefaultSingletonBeanRegistry的属性dependentBeanMap中添加值，把依赖bean的beanName作为key，当前对象放入value集合中
+							 */
 							registerDependentBeans(beanName, autowiredBeans);
 							if (autowiredBeans.size() == paramTypes.length) {
 								Iterator<String> it = autowiredBeans.iterator();

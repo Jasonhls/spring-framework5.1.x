@@ -408,9 +408,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public void registerDependentBean(String beanName, String dependentBeanName) {
 		String canonicalName = canonicalName(beanName);
 
+		//把依赖的bean的beanName作为key，把当前依赖这个bean的单例bean的beanName放入value集合中
 		synchronized (this.dependentBeanMap) {
+			//把依赖bean的beanName为key，创建的LinkedHashSet集合作为value，如果有key，就不需要，最后返回value集合
 			Set<String> dependentBeans =
 					this.dependentBeanMap.computeIfAbsent(canonicalName, k -> new LinkedHashSet<>(8));
+			//然后把当前依赖这个bean的单例bean的beanName添加到value集合中
 			if (!dependentBeans.add(dependentBeanName)) {
 				return;
 			}
@@ -565,12 +568,18 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		Set<String> dependencies;
 		synchronized (this.dependentBeanMap) {
 			// Within full synchronization in order to guarantee a disconnected Set
+			/**
+			 * dependentBeanMap中存放key的是bean的beanName，value是所有依赖这个bean的bean的beanName集合
+			 */
 			dependencies = this.dependentBeanMap.remove(beanName);
 		}
 		if (dependencies != null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Retrieved dependent beans for bean '" + beanName + "': " + dependencies);
 			}
+			/**
+			 * 摧毁所有依赖当前beanName对应的bean的单例，比如单例A依赖单例B，如果当前beanName是单例B的名称，那么单例A这里会被销毁
+			 */
 			for (String dependentBeanName : dependencies) {
 				destroySingleton(dependentBeanName);
 			}
