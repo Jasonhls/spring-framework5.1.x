@@ -1742,6 +1742,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				Object originalValue = pv.getValue();
 				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
 				Object convertedValue = resolvedValue;
+				//下面的isWritableProperty会从CachedIntrospectionResults中获取属性描述器的缓存，并赋值给当前实例的BeanWrapperImpl对象的属性cachedIntrospectionResults
+				//下面设置对当前实例的属性设置propertyValues会用到当前对象的属性描述器
 				boolean convertible = bw.isWritableProperty(propertyName) &&
 						!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName);
 				if (convertible) {

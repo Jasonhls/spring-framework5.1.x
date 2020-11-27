@@ -724,6 +724,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	protected PropertyHandler getPropertyHandler(String propertyName) throws BeansException {
 		Assert.notNull(propertyName, "Property name must not be null");
 		AbstractNestablePropertyAccessor nestedPa = getPropertyAccessorForPropertyPath(propertyName);
+		//如果这里是BeanWrapperImpl对象，那会从CachedIntrospectionResults中获取属性描述器的缓存，并赋值给当前实例的BeanWrapperImpl对象的属性cachedIntrospectionResults
 		return nestedPa.getLocalPropertyHandler(getFinalPath(nestedPa, propertyName));
 	}
 
