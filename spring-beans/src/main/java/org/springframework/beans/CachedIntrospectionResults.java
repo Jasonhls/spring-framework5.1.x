@@ -190,6 +190,7 @@ public final class CachedIntrospectionResults {
 			classCacheToUse = softClassCache;
 		}
 
+		//classCacheToUse跟strongClassCache指的是同一个对象，因此这里会把results(即CachedIntrospectionResults对象)放入strongClassCache缓存中
 		CachedIntrospectionResults existing = classCacheToUse.putIfAbsent(beanClass, results);
 		return (existing != null ? existing : results);
 	}
@@ -279,6 +280,7 @@ public final class CachedIntrospectionResults {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
 			//获取beanClass对应的bean信息
+			//使用的方法是Introspector.getBeanInfo(beanClass)（该方法是jdk中自带的）去获取这个Class的bean信息，包括各种方法，属性
 			this.beanInfo = getBeanInfo(beanClass);
 
 			if (logger.isTraceEnabled()) {
@@ -287,6 +289,7 @@ public final class CachedIntrospectionResults {
 			this.propertyDescriptorCache = new LinkedHashMap<>();
 
 			// This call is slow so we do it once.
+			//这里的属性描述对象是通过上面的getBeanInfo(beanClass)获取的
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
 				if (Class.class == beanClass &&
@@ -300,7 +303,9 @@ public final class CachedIntrospectionResults {
 							(pd.getPropertyEditorClass() != null ?
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
+				//创建属性描述器
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+				//然后放入缓存propertyDescriptorCache中
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 

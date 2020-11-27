@@ -171,6 +171,11 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 */
 	private CachedIntrospectionResults getCachedIntrospectionResults() {
 		if (this.cachedIntrospectionResults == null) {
+			/**
+			 * 通过CachedIntrospectionResults的静态方法获取cachedIntrospectionResults（对象所有的属性描述器缓存在这里面），
+			 *  并赋值给this.cachedIntrospection，这里this值得是BeanWrapperImpl对象
+			 * 因此当前实例的BeanWrapperImpl中就可以获取属性描述器了
+			 */
 			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(getWrappedClass());
 		}
 		return this.cachedIntrospectionResults;
@@ -227,6 +232,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	@Override
 	@Nullable
 	protected BeanPropertyHandler getLocalPropertyHandler(String propertyName) {
+		//这里会从CachedIntrospectionResults中获取属性描述器的缓存，并赋值给当前实例的BeanWrapperImpl对象的属性cachedIntrospectionResults
 		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(propertyName);
 		return (pd != null ? new BeanPropertyHandler(pd) : null);
 	}

@@ -229,6 +229,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		//寻找该Class中是否有注入元数据(即是否带有@Autowired、@Value注解的字段或方法)
+		//会创建属性描述器
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
 		//遍历InjectionMetadata对象中的属性injectedElements，根据条件添加到InjectionMetadata的属性checkedElements中，同时会给RootBeanDefinition的属性externallyManagedConfigMembers赋值
 		metadata.checkConfigMembers(beanDefinition);
@@ -248,6 +249,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		// Let's check for lookup methods here...
 		if (!this.lookupMethodsChecked.contains(beanName)) {
 			try {
+				//下面这个doWithMethods方法，会把beanClass的所有的declaredMethods缓存在ReflectionUtils的属性declaredMethodsCache中
 				ReflectionUtils.doWithMethods(beanClass, method -> {
 					Lookup lookup = method.getAnnotation(Lookup.class);
 					if (lookup != null) {
@@ -433,6 +435,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						metadata.clear(pvs);
 					}
 					//如果缓存中没有注入元数据信息，就去获取注入元数据，即寻找该clazz是否带有@Autowired、@Value注解的元数据（即字段或方法）
+					//会创建属性描述器
 					metadata = buildAutowiringMetadata(clazz);
 					//将注入信息放入缓存中
 					this.injectionMetadataCache.put(cacheKey, metadata);
@@ -466,6 +469,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				}
 			});
 
+			/**
+			 * 根据java8中，lambda表达式规则，doWithLocalMethods方法的第二个入参为MethodCallback接口，该接口有唯一的一个方法doWith(Method method)
+			 * lambda表达式中的method即该接口doWith方法中的入参method，具体接口代码实现就是大括号包含的代码部分。
+			 */
 			//处理是否有注入的方法
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
 				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
@@ -490,7 +497,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					//判断该注解是否是必须的
 					boolean required = determineRequiredStatus(ann);
 					/**
-					 * 获取属性描述器
+					 * 创建属性描述器
 					 */
 					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 					currElements.add(new AutowiredMethodElement(method, required, pd));
@@ -670,8 +677,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			this.required = required;
 		}
 
+		//通过方法注入属性，这里的bean就是当前对象
 		@Override
 		protected void inject(Object bean, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
+			//这里判断是否需要注入，如果pvs的属性propertyValueList中含有该属性，则这里直接返回，不进行注入，在populate方法后面会专门对PropertyValues进行注入
 			if (checkPropertySkipping(pvs)) {
 				return;
 			}
