@@ -229,9 +229,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		//寻找该Class中是否有注入元数据(即是否带有@Autowired、@Value注解的字段或方法)
-		//会创建属性描述器
+		//会创建属性描述器，并缓存在final类CacheIntrospectionResults的属性strongClassCache中，后面populate中设置propertyValues代码中会用到
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
-		//遍历InjectionMetadata对象中的属性injectedElements，根据条件添加到InjectionMetadata的属性checkedElements中，同时会给RootBeanDefinition的属性externallyManagedConfigMembers赋值
+		//遍历InjectionMetadata对象中的属性injectedElements，根据条件添加到InjectionMetadata的属性checkedElements中，
+		// 同时会给RootBeanDefinition的属性externallyManagedConfigMembers赋值
 		metadata.checkConfigMembers(beanDefinition);
 	}
 
@@ -435,7 +436,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						metadata.clear(pvs);
 					}
 					//如果缓存中没有注入元数据信息，就去获取注入元数据，即寻找该clazz是否带有@Autowired、@Value注解的元数据（即字段或方法）
-					//会创建属性描述器
+					//会创建属性描述器，并缓存在final类CacheIntrospectionResults的属性strongClassCache中，后面populate中设置propertyValues代码中会用到
 					metadata = buildAutowiringMetadata(clazz);
 					//将注入信息放入缓存中
 					this.injectionMetadataCache.put(cacheKey, metadata);
