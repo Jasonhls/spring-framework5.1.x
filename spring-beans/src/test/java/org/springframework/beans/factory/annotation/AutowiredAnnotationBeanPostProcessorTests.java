@@ -96,6 +96,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		//设置依赖比较器，用于依赖注入的属性为数组
 		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 	}
 
@@ -199,6 +200,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public void testExtendedResourceInjectionWithOverriding() {
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(TypedExtendedResourceInjectionBean.class);
 		TestBean tb2 = new TestBean();
+		//设置了propertyValues，那么对应的属性不会被注入，而是会用propertyValues集合中配置的对象赋值给这个属性
 		annotatedBd.getPropertyValues().add("testBean2", tb2);
 		bf.registerBeanDefinition("annotatedBean", annotatedBd);
 		TestBean tb = new TestBean();
@@ -2344,6 +2346,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Autowired
 		void setTestBean2(TestBean testBean2);
 
+		//被@Autowired注解注释的方法，都会在doCreateBean的方法applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName)中先预解析，
+		// 然后在populate中执行该方法
 		@Autowired
 		default void injectDefault(ITestBean testBean4) {
 			markSubInjected();
@@ -2384,6 +2388,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		private NestedTestBean[] nestedTestBeans;
 
+		//把spring中的所有的单例NestedTestBean注入到下面这个属性中，属性nestedTestBeansField中元素跟属性nestedTestBeans中的元素一模一样，且属于同一对象
 		@Autowired(required = false)
 		public NestedTestBean[] nestedTestBeansField;
 
@@ -2399,6 +2404,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		private void inject(ITestBean testBean4, NestedTestBean[] nestedTestBeans, IndexedTestBean indexedTestBean) {
 			this.testBean4 = testBean4;
 			this.indexedTestBean = indexedTestBean;
+			//也会把spring中所有的单例NestedTestBean注入到属性nestedTestBean中
 			this.nestedTestBeans = nestedTestBeans;
 		}
 

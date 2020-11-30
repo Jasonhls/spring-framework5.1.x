@@ -1250,6 +1250,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 
+			//获取依赖注入的对象
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
 			if (multipleBeans != null) {
 				return multipleBeans;
@@ -1331,6 +1332,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			return stream;
 		}
+		//如果属性类型为数组
 		else if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
 			ResolvableType resolvableType = descriptor.getResolvableType();
@@ -1341,6 +1343,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (componentType == null) {
 				return null;
 			}
+			//获取依赖对象的名称
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType,
 					new MultiElementDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
@@ -1351,7 +1354,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), resolvedArrayType);
+			//将结果进行排序
 			if (result instanceof Object[]) {
+				//获取比较器
 				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
 				if (comparator != null) {
 					Arrays.sort((Object[]) result, comparator);
@@ -1420,6 +1425,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private Comparator<Object> adaptDependencyComparator(Map<String, ?> matchingBeans) {
 		Comparator<Object> comparator = getDependencyComparator();
 		if (comparator instanceof OrderComparator) {
+			//如果是实现了Order类型的比较器，就会走这里
 			return ((OrderComparator) comparator).withSourceProvider(
 					createFactoryAwareOrderSourceProvider(matchingBeans));
 		}
