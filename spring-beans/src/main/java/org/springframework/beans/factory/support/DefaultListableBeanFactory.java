@@ -503,6 +503,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
+			//根据type获取spring容器中所有对应的beanName，并以beanName作为key，会包装该beanName原始的bean定义对象生成新的RootBeanDefinition作为value，
+			// 缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中
 			return doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
 		}
 		//如果考虑非单例bean，那么缓存使用属性allBeanNamesByType集合对象，如果不考虑非单例bean，那么缓存使用属性singletonBeanNamesByType集合对象
@@ -531,6 +533,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
 				try {
+					//根据beanName获取新的mbd，并将beanName作为key，会包装该beanName原始的bean定义对象生成新的RootBeanDefinition作为value，
+					// 缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中
 					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 					// Only check bean definition if it is complete.
 					if (!mbd.isAbstract() && (allowEagerInit ||
@@ -1294,10 +1298,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				autowiredBeanNames.add(autowiredBeanName);
 			}
 			if (instanceCandidate instanceof Class) {
+				//这里会通过getBean方法获取bean，所以会存放到spring的单例容器中
+				//如果是FactoryBean，返回的对象就是FactoryBean的getObject方法返回的对象。如果getObject返回的为空，那么spring会自动创建一个NullBean对象作为返回
 				instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
 			}
 			Object result = instanceCandidate;
 			if (result instanceof NullBean) {
+				//如果返回的对象属于NullBean类型，result赋值为null
 				if (isRequired(descriptor)) {
 					raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
 				}
@@ -1464,7 +1471,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected Map<String, Object> findAutowireCandidates(
 			@Nullable String beanName, Class<?> requiredType, DependencyDescriptor descriptor) {
 
-		//根据依赖的Class类型，获取spring中该类型的bean的beanName集合
+		//下面的beanNamesForTypeIncludingAncestors方法中会根据requiredType获取spring容器中所有的beanName集合，并以beanName作为key，
+		// 会包装该beanName原始的bean定义对象生成新的RootBeanDefinition作为value，缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				this, requiredType, true, descriptor.isEager());
 		Map<String, Object> result = new LinkedHashMap<>(candidateNames.length);

@@ -344,9 +344,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							throw ex;
 						}
 					});
-					//获取的sharedInstance对象是beanName对应的bean实例对象
-					//获取了Bean实例后，检查当前bean是否是FactoryBean类型的bean，如果是，
-					// 那么需要调用该bean对应的FactoryBean实例中的getObject()作为返回值
+					/**
+					 * 获取的sharedInstance对象是beanName对应的bean实例对象
+					 * 获取了Bean实例后，检查当前bean是否是FactoryBean类型的bean，如果是，
+					 * 那么需要调用该bean对应的FactoryBean实例中的getObject()作为返回值
+					 */
 					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 				}
 
@@ -664,6 +666,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
 			if (!BeanFactoryUtils.isFactoryDereference(name)) {
 				// If it's a FactoryBean, we want to look at what it creates, not at the factory class.
+				//如果是一个FactoryBean，那就获取FactoryBean类的getObjectType返回的Class并返回
 				return getTypeForFactoryBean(beanName, mbd);
 			}
 			else {
@@ -1282,6 +1285,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (bd.getParentName() == null) {
 					// Use copy of given root bean definition.
 					if (bd instanceof RootBeanDefinition) {
+						//复制最原始的BeanDefinition，生成一个新的RootBeanDefinition对象
 						mbd = ((RootBeanDefinition) bd).cloneBeanDefinition();
 					}
 					else {
@@ -1707,7 +1711,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
-			//调用getObject()方法获取对象
+			/**
+			 *调用getObject()方法获取对象
+			 */
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;

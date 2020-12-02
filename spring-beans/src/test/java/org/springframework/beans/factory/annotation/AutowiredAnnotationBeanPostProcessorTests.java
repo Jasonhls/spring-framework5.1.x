@@ -390,6 +390,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNull(bean.getNestedTestBeans());
 	}
 
+	//注入实现了Order接口的bean
 	@Test
 	public void testOrderedResourceInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
@@ -419,6 +420,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.nestedTestBeansField[1]);
 	}
 
+	//注入被注解@Order标注的类的bean
 	@Test
 	public void testAnnotationOrderedResourceInjection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
@@ -445,6 +447,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.nestedTestBeansField[1]);
 	}
 
+	//多个属性注入实现了Order接口的bean
 	@Test
 	public void testOrderedCollectionResourceInjection() {
 		RootBeanDefinition rbd = new RootBeanDefinition(OptionalCollectionResourceInjectionBean.class);
@@ -480,6 +483,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.nestedTestBeansField.get(1));
 	}
 
+	//多个属性注入被@Order标注的bean
 	@Test
 	public void testAnnotationOrderedCollectionResourceInjection() {
 		RootBeanDefinition rbd = new RootBeanDefinition(OptionalCollectionResourceInjectionBean.class);
@@ -513,6 +517,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.nestedTestBeansField.get(1));
 	}
 
+	//通过构造方法注入bean
 	@Test
 	public void testConstructorResourceInjection() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
@@ -2385,8 +2390,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Autowired(required = false)
 		protected ITestBean testBean3;
 
+		//通过方法注入bean
 		private IndexedTestBean indexedTestBean;
 
+		//通过方法注入bean
 		private NestedTestBean[] nestedTestBeans;
 
 		//把spring中的所有的单例NestedTestBean注入到下面这个属性中，属性nestedTestBeansField中元素跟属性nestedTestBeans中的元素一模一样，且属于同一对象
@@ -2498,6 +2505,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			throw new UnsupportedOperationException();
 		}
 
+		//通过构造方法注入bean
 		@Autowired
 		public ConstructorResourceInjectionBean(@Autowired(required = false) ITestBean testBean4,
 				@Autowired(required = false) NestedTestBean nestedTestBean,

@@ -564,6 +564,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Instantiate the bean.
 		BeanWrapper instanceWrapper = null;
 		if (mbd.isSingleton()) {
+			//如果是单例先从FactoryBean缓存中获取，factoryBeanInstanceCache专门缓存FactoryBean对象的
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
@@ -900,12 +901,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Let's obtain a shortcut instance for an early getObjectType() call...
-		FactoryBean<?> fb = (mbd.isSingleton() ?
+ 		FactoryBean<?> fb = (mbd.isSingleton() ?
 				getSingletonFactoryBeanForTypeCheck(beanName, mbd) :
 				getNonSingletonFactoryBeanForTypeCheck(beanName, mbd));
 
 		if (fb != null) {
 			// Try to obtain the FactoryBean's object type from this early stage of the instance.
+			//调用该FactoryBean的getObjectType方法获取Class并返回
 			Class<?> result = getTypeForFactoryBean(fb);
 			if (result != null) {
 				return result;
@@ -1050,6 +1052,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			FactoryBean<?> fb = getFactoryBean(beanName, instance);
 			if (bw != null) {
+				//把FactoryBean放入缓存中
 				this.factoryBeanInstanceCache.put(beanName, bw);
 			}
 			return fb;
@@ -1239,6 +1242,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		//判断是否有@Autowired 修饰的构造器
 		if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR ||
 				mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args)) {
+			//获取注入对象过程
 			return autowireConstructor(beanName, mbd, ctors, args);
 		}
 
@@ -1351,6 +1355,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						getAccessControlContext());
 			}
 			else {
+				//通过构造器反射创建对象
 				beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);
 			}
 			//把bean实例封装到BeanWrapperImpl的父类AbstractNestablePropertyAccessor的属性wrappedObject中，后面直接从BeanWrapperImpl中获取bean实例
@@ -1397,7 +1402,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected BeanWrapper autowireConstructor(
 			String beanName, RootBeanDefinition mbd, @Nullable Constructor<?>[] ctors, @Nullable Object[] explicitArgs) {
-
+		//获取注入对象过程
 		return new ConstructorResolver(this).autowireConstructor(beanName, mbd, ctors, explicitArgs);
 	}
 

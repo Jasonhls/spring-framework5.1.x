@@ -191,6 +191,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				throw new BeanCurrentlyInCreationException(
 						beanName, "FactoryBean which is currently in creation returned null from getObject");
 			}
+			//如果为空，会创建一个NullBean对象返回
 			object = new NullBean();
 		}
 		return object;

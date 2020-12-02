@@ -224,6 +224,8 @@ public abstract class BeanFactoryUtils {
 			ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		//根据type获取spring容器中所有的beanName，并以beanName作为key，会包装该beanName原始的bean定义对象生成新的RootBeanDefinition作为value，
+		//	缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中
 		String[] result = lbf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
