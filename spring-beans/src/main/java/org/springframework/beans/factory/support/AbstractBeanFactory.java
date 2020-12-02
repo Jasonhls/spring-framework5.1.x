@@ -263,6 +263,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			//如果this为DefaultListableBeanFactory，由于DefaultListableBeanFactory的父类是AbstractAutowireCapableBeanFactory，
+			//而AbstractAutowireCapableBeanFactory的父类是AbstractBeanFactory，而AbstractBeanFactory和AbstractAutowiredCapableBeanFactory都有
+			//getObjectForBeanInstance方法，因此在AbstractBeanFactory类的方法中，getObjectForBeanInstance会去执行子类AbstractAutowireCapableBeanFactory
+			//的getObjectForBeanInstance方法，然后不是自己（即AbstractBeanFactory）的getObjectForBeanInstance方法，如果此时子类AbstractAutowireCapableBeanFactory
+			//的getObjectForBeanInstance方法有调用父类的getObjectForBeanInstance方法，才会接着执行父类的getObjectForBeanInstance方法。
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 

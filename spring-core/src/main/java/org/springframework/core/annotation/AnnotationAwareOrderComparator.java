@@ -62,6 +62,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	@Nullable
 	protected Integer findOrder(Object obj) {
 		// Check for regular Ordered interface
+		//先执行父类的findOrder获取order值
 		Integer order = super.findOrder(obj);
 		if (order != null) {
 			return order;
@@ -84,6 +85,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 			}
 		}
 		else {
+			//然后获取类上是否有@Order注解，如果有，获取类上@Order中的value值
 			order = OrderUtils.getOrder(obj.getClass());
 			if (order == null && obj instanceof DecoratingProxy) {
 				order = OrderUtils.getOrder(((DecoratingProxy) obj).getDecoratedClass());

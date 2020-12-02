@@ -397,6 +397,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("testBean", tb);
 		IndexedTestBean itb = new IndexedTestBean();
 		bf.registerSingleton("indexedTestBean", itb);
+		//OrderedNestedTestBean实现了Order接口，如果有两个相同的bean被其他类注入的时候会进行排序
 		OrderedNestedTestBean ntb1 = new OrderedNestedTestBean();
 		ntb1.setOrder(2);
 		bf.registerSingleton("nestedTestBean1", ntb1);

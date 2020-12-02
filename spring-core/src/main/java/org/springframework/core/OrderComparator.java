@@ -112,6 +112,7 @@ public class OrderComparator implements Comparator<Object> {
 				}
 			}
 		}
+		//getOrder
 		return (order != null ? order : getOrder(obj));
 	}
 
@@ -124,6 +125,7 @@ public class OrderComparator implements Comparator<Object> {
 	 */
 	protected int getOrder(@Nullable Object obj) {
 		if (obj != null) {
+			//解析@Order注解，获取value值
 			Integer order = findOrder(obj);
 			if (order != null) {
 				return order;
