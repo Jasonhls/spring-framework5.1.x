@@ -1299,7 +1299,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			if (instanceCandidate instanceof Class) {
 				//这里会通过getBean方法获取bean，所以会存放到spring的单例容器中
-				//如果是FactoryBean，返回的对象就是FactoryBean的getObject方法返回的对象。如果getObject返回的为空，那么spring会自动创建一个NullBean对象作为返回
+				//如果是FactoryBean，返回的对象就是FactoryBean的getObject方法返回的对象。如果getObject方法返回的为空，
+				// 那么getBean方法中spring会自动创建一个NullBean对象作为返回getBean方法的返回值
 				instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
 			}
 			Object result = instanceCandidate;
