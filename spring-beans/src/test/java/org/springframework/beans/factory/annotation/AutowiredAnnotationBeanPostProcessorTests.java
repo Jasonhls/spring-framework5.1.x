@@ -545,6 +545,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bf, bean.getBeanFactory());
 	}
 
+	//注入FactoryBean类型的bean，并且getObject方法返回为null
 	@Test
 	public void testConstructorResourceInjectionWithNullFromFactoryBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
@@ -585,7 +586,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("nestedTestBean", ntb);
 		bf.registerSingleton("nestedTestBean2", new NestedTestBean());
 
-		ConstructorResourceInjectionBean bean = (ConstructorResourceInjectionBean) bf.getBean("annotatedBean");
+ 		ConstructorResourceInjectionBean bean = (ConstructorResourceInjectionBean) bf.getBean("annotatedBean");
 		assertNull(bean.getTestBean());
 		assertNull(bean.getTestBean2());
 		assertNull(bean.getTestBean3());

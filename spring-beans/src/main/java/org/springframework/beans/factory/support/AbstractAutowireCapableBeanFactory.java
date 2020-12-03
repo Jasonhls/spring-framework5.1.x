@@ -571,7 +571,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//第2次调用后置处理器
 			/**
 			 * 创建bean实例，并将实例放在包装类BeanWrapper中返回
-			 * 1.通过工厂方法创建Bean实例   method.invoke(obj,args)
+			 * 1.通过工厂方法（FactoryMethod）创建Bean实例   method.invoke(obj,args)
 			 * 2.通过构造方法自动注入创建实例Bean  clazz.newInstance(constructors)
 			 * 3.通过无参构造器创建实例Bean  clazz.newInstance()
 			 */
@@ -1203,6 +1203,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		//@Bean修饰的bean被创建  method.invoke(ob,args)
+		//如果当前bean的BeanDefinition中定义了FactoryMethodName，会走下面这个逻辑并返回bean实例
 		if (mbd.getFactoryMethodName() != null) {
 			//这里面会执行配置类中被注解@Bean注释的方法体
 			return instantiateUsingFactoryMethod(beanName, mbd, args);

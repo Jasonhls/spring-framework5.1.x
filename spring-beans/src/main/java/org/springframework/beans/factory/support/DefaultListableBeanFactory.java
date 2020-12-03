@@ -504,7 +504,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public String[] getBeanNamesForType(@Nullable Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen() || type == null || !allowEagerInit) {
 			//根据type获取spring容器中所有对应的beanName，并以beanName作为key，会包装该beanName原始的bean定义对象生成新的RootBeanDefinition作为value，
-			// 缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中
+			// 缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中，并返回与type匹配的beanName集合
 			return doGetBeanNamesForType(ResolvableType.forRawClass(type), includeNonSingletons, allowEagerInit);
 		}
 		//如果考虑非单例bean，那么缓存使用属性allBeanNamesByType集合对象，如果不考虑非单例bean，那么缓存使用属性singletonBeanNamesByType集合对象
@@ -535,7 +535,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				try {
 					//根据beanName获取新的mbd，并将beanName作为key，会包装该beanName原始的bean定义对象生成新的RootBeanDefinition作为value，
 					// 缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中
+					//这里是对spring容器中beanDefinitionNames中所有的beanName操作，都会缓存到this.mergedBeanDefinitions中
 					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+					//然后下面的isTypeMatch方法就是找出与type匹配的beanName，并放到集合result中返回
 					// Only check bean definition if it is complete.
 					if (!mbd.isAbstract() && (allowEagerInit ||
 							(mbd.hasBeanClass() || !mbd.isLazyInit() || isAllowEagerClassLoading()) &&
@@ -1474,6 +1476,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		//下面的beanNamesForTypeIncludingAncestors方法中会根据requiredType获取spring容器中所有的beanName集合，并以beanName作为key，
 		// 会包装该beanName原始的bean定义对象生成新的RootBeanDefinition作为value，缓存到DefaultListableBeanFactory的父类AbstractBeanFactory的属性mergedBeanDefinitions中
+		//并返回与type匹配的beanName集合
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				this, requiredType, true, descriptor.isEager());
 		Map<String, Object> result = new LinkedHashMap<>(candidateNames.length);
