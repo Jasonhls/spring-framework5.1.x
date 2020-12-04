@@ -622,6 +622,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb2, bean.getNestedTestBeans()[1]);
 	}
 
+	//spring容器中没有ITestBean这个bean的定义，因此没法向ConstructorWithoutFallbackBean中注入ITestBean实例
 	@Test
 	public void testConstructorResourceInjectionWithNoCandidatesAndNoFallback() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
@@ -636,6 +637,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 	}
 
+	//如果依赖FactoryBean，该Factor有Bean的getObject方法返回null，那么这个FactoryBean不会被注入
 	@Test
 	public void testConstructorResourceInjectionWithCollectionAndNullFromFactoryBean() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(
@@ -647,6 +649,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("nestedTestBean2", ntb2);
 
 		ConstructorsCollectionResourceInjectionBean bean = (ConstructorsCollectionResourceInjectionBean) bf.getBean("annotatedBean");
+		//多个构造方法被@Autowired注解标注，只有入参最多的那个构造方法会被进行注入，因此这里并没有把ITestBean实例注入给属性testBean3
 		assertNull(bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
 		assertEquals(1, bean.getNestedTestBeans().size());
