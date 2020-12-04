@@ -2574,6 +2574,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			this.myTest = myTest;
 		}
 
+		//同理，这里的testBean3不会有值，因为下面这个通过构造器注入的构造方法不会进行注入，被放弃了
 		@Autowired(required = false)
 		public ConstructorsResourceInjectionBean(ITestBean testBean3) {
 			this.testBean3 = testBean3;
