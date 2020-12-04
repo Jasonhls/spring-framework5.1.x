@@ -28,6 +28,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
@@ -57,8 +58,10 @@ abstract class AutowireUtils {
 		if (p1 != p2) {
 			return (p1 ? -1 : 1);
 		}
+		//根据参数的个数进行比较
 		int c1pl = e1.getParameterCount();
 		int c2pl = e2.getParameterCount();
+		//Integer.compare(a, b)，a与b进行比较，a < b返回-1，a = b返回0， a > b返回1
 		return Integer.compare(c2pl, c1pl);
 	};
 
@@ -71,6 +74,7 @@ abstract class AutowireUtils {
 	 * @param constructors the constructor array to sort
 	 */
 	public static void sortConstructors(Constructor<?>[] constructors) {
+		//EXECUTABLE_COMPARATOR比较器，会根据方法的参数进行排序
 		Arrays.sort(constructors, EXECUTABLE_COMPARATOR);
 	}
 

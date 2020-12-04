@@ -65,10 +65,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.NestedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.*;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.SerializationTestUtils;
 
@@ -573,6 +570,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bf, bean.getBeanFactory());
 	}
 
+	//注入通过FactoryMethod创建的bean实例，并且FactoryBean方法返回值为空
 	@Test
 	public void testConstructorResourceInjectionWithNullFromFactoryMethod() {
 		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
@@ -603,6 +601,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(bf, bean.getBeanFactory());
 	}
 
+	//如果有多个构造器进行注入，会选择其中入参个数最多的那个构造器进行注入，然后剩下进行构造器注入的构造方法都不会被用于注入了
 	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidates() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsResourceInjectionBean.class));
@@ -612,6 +611,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("nestedTestBean1", ntb1);
 		NestedTestBean ntb2 = new NestedTestBean();
 		bf.registerSingleton("nestedTestBean2", ntb2);
+		MyTest myTest = new MyTest();
+		bf.registerSingleton("myTest", myTest);
 
 		ConstructorsResourceInjectionBean bean = (ConstructorsResourceInjectionBean) bf.getBean("annotatedBean");
 		assertNull(bean.getTestBean3());
@@ -2556,7 +2557,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		private NestedTestBean[] nestedTestBeans;
 
+		private MyTest myTest;
+
 		public ConstructorsResourceInjectionBean() {
+		}
+
+		/**
+		 * 这里不会注入MyTest这个bean，因为当前类有好几个通过构造器方法注入，spring会优先选择入参个数最多的那个构造器进行注入，而且只会进行一次构造器注入。
+		 * 下面这个构造器必须标注required=false，因为AutowiredAnnotationBeanPostProcessor中的determineCandidateConstructors方法，会判断，如果已经找到
+		 * 通过构造器注入方式的构造方法，那么遍历下一个通过构造器注入方式的构造方法的时候，会判断该构造方法上标注的@Autowired的required是否为true，为true会
+		 * 抛出异常
+		 * @param myTest
+		 */
+		@Autowired(required = false)
+		public ConstructorsResourceInjectionBean(MyTest myTest) {
+			this.myTest = myTest;
 		}
 
 		@Autowired(required = false)
