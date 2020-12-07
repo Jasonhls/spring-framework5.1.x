@@ -815,12 +815,16 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNull(bean.getNestedTestBeans());
 	}
 
+	//当入参不为集合，数组，Map，找不到依赖的ITestBean的定义的时候，就会抛出UnsatisfiedDependencyException
 	@Test(expected = UnsatisfiedDependencyException.class)
 	public void testSingleConstructorInjectionWithMissingDependency() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorOptionalCollectionBean.class));
 		bf.getBean("annotatedBean");
 	}
 
+	//由于唯一的构造方法的第一个入参是ITestBean，ITestBean的getBean方法返回NullBean，在DefaultListableBeanFactory的doResolveDependency方法中，
+	//寻找依赖的过程中，如果返回的依赖为NullBean对象，会进行判断isRequired(descriptor)判断，如果为true，会执行代码行raiseNoMatchingBeanFound，
+	// 该代码会抛出bean定义未找到的异常，然后ConstructorResolver的createArgumentArray方法中就会抛出UnsatisfiedDependencyException的异常
 	@Test(expected = UnsatisfiedDependencyException.class)
 	public void testSingleConstructorInjectionWithNullDependency() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorOptionalCollectionBean.class));

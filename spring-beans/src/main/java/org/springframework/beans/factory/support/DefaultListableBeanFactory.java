@@ -1308,11 +1308,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
 			}
 			Object result = instanceCandidate;
+			//如果返回的对象属于NullBean类型
 			if (result instanceof NullBean) {
-				//如果返回的对象属于NullBean类型，result赋值为null
 				if (isRequired(descriptor)) {
 					raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
 				}
+				//result赋值为null
 				result = null;
 			}
 			if (!ClassUtils.isAssignableValue(type, result)) {
