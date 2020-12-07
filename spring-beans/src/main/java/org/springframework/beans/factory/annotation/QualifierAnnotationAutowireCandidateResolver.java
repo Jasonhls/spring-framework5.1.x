@@ -326,6 +326,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 			return false;
 		}
 		Autowired autowired = descriptor.getAnnotation(Autowired.class);
+		//如果没有被@Autowired注解标注，就返回true，否则就返回@Autowired中的required的值
 		return (autowired == null || autowired.required());
 	}
 

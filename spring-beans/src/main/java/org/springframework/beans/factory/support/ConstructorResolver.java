@@ -875,19 +875,24 @@ class ConstructorResolver {
 			throw ex;
 		}
 		catch (NoSuchBeanDefinitionException ex) {
+			//如果在spring容器中找不到bean定义，再做逻辑判断，是否需要抛出异常
 			if (fallback) {
 				// Single constructor or factory method -> let's return an empty array/collection
 				// for e.g. a vararg or a non-null List/Set/Map parameter.
+				//如果是数组，返回一个空数组
 				if (paramType.isArray()) {
 					return Array.newInstance(paramType.getComponentType(), 0);
 				}
+				//如果是集合，返回一个空集合
 				else if (CollectionFactory.isApproximableCollectionType(paramType)) {
 					return CollectionFactory.createCollection(paramType, 0);
 				}
+				//如果是Map，返回一个空Map
 				else if (CollectionFactory.isApproximableMapType(paramType)) {
 					return CollectionFactory.createMap(paramType, 0);
 				}
 			}
+			//如果以上都不是，才会抛出bean定义不存在的异常
 			throw ex;
 		}
 	}

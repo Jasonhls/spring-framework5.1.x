@@ -1265,9 +1265,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			//这里会判断是否带有@Qualifier注解
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
+				//如果没有被@Autowired注解标注，或者@Autowired注解中的required值为true
 				if (isRequired(descriptor)) {
 					raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
 				}
+				//如果被@Autowired注解标注，且required=false，就直接返回null
 				return null;
 			}
 

@@ -672,6 +672,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("nestedTestBean2", ntb2);
 
 		ConstructorsCollectionResourceInjectionBean bean = (ConstructorsCollectionResourceInjectionBean) bf.getBean("annotatedBean");
+		//同理因为多个构造方法被注解@Autowired标注，只会采用入参最多的那个构造进行构造器注入属性，所以这里的testBean3属性没有被注入，为空
 		assertNull(bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
 		assertEquals(2, bean.getNestedTestBeans().size());
@@ -679,6 +680,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb2, bean.getNestedTestBeans().get(1));
 	}
 
+	//通过构造器注入数组属性，数组存放继承了相同的类的bean，会根据该类上标注的@Order注解进行排序
 	@Test
 	public void testConstructorResourceInjectionWithMultipleOrderedCandidates() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsResourceInjectionBean.class));
@@ -697,6 +699,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.getNestedTestBeans()[1]);
 	}
 
+	//通过构造器注入集合属性，集合中存放继承了相同类的bean，会根据该类上标注的@Order进行排序
 	@Test
 	public void testConstructorResourceInjectionWithMultipleCandidatesAsOrderedCollection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsCollectionResourceInjectionBean.class));
@@ -715,6 +718,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.getNestedTestBeans().get(1));
 	}
 
+	//单构造方法
 	@Test
 	public void testSingleConstructorInjectionWithMultipleCandidatesAsRequiredVararg() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorVarargBean.class));
@@ -725,6 +729,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		FixedOrder1NestedTestBean ntb2 = new FixedOrder1NestedTestBean();
 		bf.registerSingleton("nestedTestBean2", ntb2);
 
+		//如果只有一个构造器，会默认使用该构造器进行属性注入，即使这个唯一的构造方法上没有被注解@Autowired标注
 		SingleConstructorVarargBean bean = (SingleConstructorVarargBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertEquals(2, bean.getNestedTestBeans().size());
@@ -732,6 +737,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.getNestedTestBeans().get(1));
 	}
 
+	//单构造方法，且有入参对应的bean没有注册在spring容器中
 	@Test
 	public void testSingleConstructorInjectionWithEmptyVararg() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorVarargBean.class));
@@ -740,10 +746,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		SingleConstructorVarargBean bean = (SingleConstructorVarargBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
+		//由于没有注册NestedTestBean，因为不会注入NestedTestBean实例，这里的nestedTestBeans不为空，是因为Arrays.asList(nestedTestBeans)方法会创建一个集合对象
 		assertNotNull(bean.getNestedTestBeans());
 		assertTrue(bean.getNestedTestBeans().isEmpty());
 	}
 
+	//单构造方法
 	@Test
 	public void testSingleConstructorInjectionWithMultipleCandidatesAsRequiredCollection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorRequiredCollectionBean.class));
@@ -761,6 +769,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(ntb1, bean.getNestedTestBeans().get(1));
 	}
 
+	//单构造方法，如果构造方法的入参为集合，数组或Map，即使找不到注入的bean的定义，也会返回空集合，空数组或空Map对象
 	@Test
 	public void testSingleConstructorInjectionWithEmptyCollection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorRequiredCollectionBean.class));
@@ -769,10 +778,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		SingleConstructorRequiredCollectionBean bean = (SingleConstructorRequiredCollectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
+		//虽然spring容器中没有任何NestedTestBean的bean定义信息，但是由于属性nestedTestBeans为集合，在构造方法中，该属性也没有被
+		//@Autowired注解标注，因此会返回空集合对象
 		assertNotNull(bean.getNestedTestBeans());
 		assertTrue(bean.getNestedTestBeans().isEmpty());
 	}
 
+	//单构造器，且入参为集合，且该集合入参被@Autowired(required=false)标注
 	@Test
 	public void testSingleConstructorInjectionWithMultipleCandidatesAsOrderedCollection() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorOptionalCollectionBean.class));
@@ -798,6 +810,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		SingleConstructorOptionalCollectionBean bean = (SingleConstructorOptionalCollectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
+		//由于spring容器没有任何NestedTestBean的bean定义信息，虽然nestedTestBeans为集合属性，但是由于在构造方法中，该属性被@Autowired(required=false)标注，
+		//因此寻找依赖的时候会返回null，而不是返回空集合。
 		assertNull(bean.getNestedTestBeans());
 	}
 
