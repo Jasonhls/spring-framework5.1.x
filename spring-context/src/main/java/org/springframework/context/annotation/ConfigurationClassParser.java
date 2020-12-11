@@ -247,6 +247,7 @@ class ConfigurationClassParser {
 		}
 		while (sourceClass != null);
 
+		//最后把config的类信息添加到ConfigurationClassParser的configurationClasses属性中，留着后面把存储在configurationClasses中的这些类注入到spring容器中
 		this.configurationClasses.put(configClass, configClass);
 	}
 
@@ -312,7 +313,7 @@ class ConfigurationClassParser {
 
 		// Process any @Import annotations
 		/**
-		 *如果该类中带有@Import注解，解析该注解的属性值 ，
+		 *如果该类(sourceClass)中带有@Import注解，解析该注解的属性值 ，
 		 * getImports(sourceClass)就是获取sourceClass中所有@Import的注解信息，包括@Import注解的value对应的Class信息
 		 * 比如@EnableWebMvc，这个注解中含有@Import注解，因此会去解析其中包含的Class是DelegatingWebMvcConfiguration.class，
 		 * 会将这个Class作为参数构造成SourceClass对象，并添加到集合中返回
@@ -586,8 +587,9 @@ class ConfigurationClassParser {
 		else {
 			this.importStack.push(configClass);
 			try {
+				//importCandidates就是currentSource上import的信息
 				for (SourceClass candidate : importCandidates) {
-					//如果是实现了ImportSelector接口的
+					//第一种方式：如果是实现了ImportSelector接口的
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
@@ -605,7 +607,7 @@ class ConfigurationClassParser {
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
-					//如果是实现了ImportBeanDefinitionRegistrar接口的class，解析该class信息并放入ConfigurationClass的属性importBeanDefinitionRegistrars中
+					//第二种方式：如果是实现了ImportBeanDefinitionRegistrar接口的class，解析该class信息并放入ConfigurationClass的属性importBeanDefinitionRegistrars中
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
@@ -619,6 +621,7 @@ class ConfigurationClassParser {
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
+						//第三种方式：既没有实现@ImportSelector接口，也没有实现ImportBeanDefinitionRegistrar接口，
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						//括号中的candidate.asConfigClass(configClass)中会把configClass添加到ConfigurationClass对象的属性importedBy属性中
