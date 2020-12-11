@@ -264,6 +264,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	@Override
 	public void afterPropertiesSet() {
 		// Do this first, it may add ResponseBodyAdvice beans
+		//这里会扫描被@ControllerAdvice注解标注的类，并把该类中配置的异常类型与处理该类型异常的方法都缓存起来
 		initExceptionHandlerAdviceCache();
 
 		if (this.argumentResolvers == null) {

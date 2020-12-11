@@ -76,6 +76,7 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 			 * ContextLoaderListener实现了javax.servlet包中的ServletContextListener接口，
 			 * 容器(比如tomcat)启动的时候，会调用ServletContextListener的contextInitialized(ServletContextEvent sce)方法，具体可以参考tomcat启动源码，
 			 * 因此这里执行完之后，就会执行这里创建ContextLoaderListener(其父类是ServletContextListener)的contextInitialized方法
+			 * 如果为java配置方式，这里的ContextLoaderListener构造器会把上面得到的context赋值给其父类ContextLoader的属性context
 			 */
 			ContextLoaderListener listener = new ContextLoaderListener(rootAppContext);
 			/**

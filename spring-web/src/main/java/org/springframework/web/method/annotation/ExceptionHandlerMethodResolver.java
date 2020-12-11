@@ -51,6 +51,7 @@ public class ExceptionHandlerMethodResolver {
 			AnnotatedElementUtils.hasAnnotation(method, ExceptionHandler.class);
 
 
+	//异常类型作为key，处理该类型的异常的方法作为value
 	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentReferenceHashMap<>(16);
@@ -108,6 +109,7 @@ public class ExceptionHandlerMethodResolver {
 	}
 
 	private void addExceptionMapping(Class<? extends Throwable> exceptionType, Method method) {
+		//会把异常类型作为key，处理该类型的异常的方法作为value，缓存到mappedMethods中
 		Method oldMethod = this.mappedMethods.put(exceptionType, method);
 		if (oldMethod != null && !oldMethod.equals(method)) {
 			throw new IllegalStateException("Ambiguous @ExceptionHandler method mapped for [" +
@@ -168,6 +170,7 @@ public class ExceptionHandlerMethodResolver {
 
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
+			//获取异常类型的处理方法，如果有配置，就会返回处理这个异常类型的方法
 			method = getMappedMethod(exceptionType);
 			this.exceptionLookupCache.put(exceptionType, method);
 		}
