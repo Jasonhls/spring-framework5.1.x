@@ -341,15 +341,18 @@ class ConfigurationClassParser {
 		}
 
 		// Process default methods on interfaces
+		//如果configClass有实现接口
 		processInterfaces(configClass, sourceClass);
 
 		// Process superclass, if any
+		//如果有父类，比如解析DelegatingWebMvcConfiguration的时候，其父类为WebMvcConfigurationSupport
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
 			if (superclass != null && !superclass.startsWith("java") &&
 					!this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
 				// Superclass found, return its annotation metadata and recurse
+				//返回父类
 				return sourceClass.getSuperClass();
 			}
 		}

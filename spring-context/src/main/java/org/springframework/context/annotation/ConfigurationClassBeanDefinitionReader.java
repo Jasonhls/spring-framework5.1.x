@@ -144,17 +144,21 @@ class ConfigurationClassBeanDefinitionReader {
 		 */
 		//解析方式一，通过@Import直接引入class，
 		// 如果被@Import引入的类，那么ConfigClass中的属性importedBy有值的，然后解析这个configClass并注入到spring容器中
+		//解析ConfigurationClass的属性importedBy，会把configClass注册到spring容器中
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
 		//解析配置文件中@Bean注解的
+		//解析ConfigurationClass的属性beanMethods，根据beanMethod对应的configClass和metadata会注册到spring容器中
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
 		//解析通过@ImportResource引入的配置文件
+		//解析ConfigurationClass的属性importedResources，如果引入的配置文件是xml，会解析xml文件，并把里面的bean注册到spring容器中
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 		//解析上述方式三，通过@Import引入实现了ImportBeanDefinitionRegistrar接口的class
+		//解析ConfigurationClass的属性importBeanDefinitionRegistrars
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
