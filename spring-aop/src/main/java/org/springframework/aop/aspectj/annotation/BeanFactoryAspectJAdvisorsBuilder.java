@@ -79,6 +79,8 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 	 * <p>Creates a Spring Advisor for each AspectJ advice method.
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
+	 * 这里会把增强器缓存起来，获取Class的方法上是否包含Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class，
+	 * 如果是就封装该方法成一个增强器对象
 	 */
 	public List<Advisor> buildAspectJAdvisors() {
 		List<String> aspectNames = this.aspectBeanNames;
@@ -105,8 +107,10 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
+								//创建获取增强器的工厂
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+								//获取增强器，这里会判断类的方法上的注解对应的Class是否是Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								if (this.beanFactory.isSingleton(beanName)) {
 									this.advisorsCache.put(beanName, classAdvisors);

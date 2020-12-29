@@ -103,6 +103,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	public DefaultNamespaceHandlerResolver(@Nullable ClassLoader classLoader, String handlerMappingsLocation) {
 		Assert.notNull(handlerMappingsLocation, "Handler mappings location must not be null");
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		//会把META-INF/spring.handlers赋值给this.handlerMappingsLocation
 		this.handlerMappingsLocation = handlerMappingsLocation;
 	}
 
@@ -136,7 +137,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				}
 				//反射获取自定义NamespaceHandler的实例
 				NamespaceHandler namespaceHandler = (NamespaceHandler) BeanUtils.instantiateClass(handlerClass);
-				//自定义的init方法会注册自定义的BeanDefinitionParser，把自定义的BeanDefinitionParser放到NamespaceHandlerSupport的属性parsers中
+				/**
+				 * 自定义的init方法会注册自定义的BeanDefinitionParser，把自定义的BeanDefinitionParser放到NamespaceHandlerSupport的属性parsers中
+				 * 比如如果这里的namespaceHandler是AopNamespaceHandler，就会把aspectj-autoproxy，value为AspectJAutoProxyBeanDefinitionParser对象放入AopNamespaceHandler父类属性parsers集合中
+				 */
 				namespaceHandler.init();
 				//这里的namespaceHandler是一个对象，之前handlerMappings中有同名的key，只是对应的值是string，即handler的全路径名，
 				// 现在这里把namespaceHandler对象放到handlerMappings中，覆盖原来的值

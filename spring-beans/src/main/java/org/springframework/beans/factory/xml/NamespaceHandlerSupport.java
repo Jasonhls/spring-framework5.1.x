@@ -70,8 +70,10 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		//从NamespaceHandlerSupport对象的缓存属性this.parsers中获取BeanDefinitionParser对象
 		BeanDefinitionParser parser = findParserForElement(element, parserContext);
 		//执行parser的parse方法
+		//如果这里是AspectJAutoProxyBeanDefinitionParser对象，就会执行该类的parse方法
 		return (parser != null ? parser.parse(element, parserContext) : null);
 	}
 

@@ -126,6 +126,7 @@ public abstract class BeanDefinitionReaderUtils {
 		}
 		else {
 			// Top-level bean: use plain class name with unique suffix if necessary.
+			//这里生成的beanName格式为全路径名+"#" + 数字，比如com.cn.Test#1
 			return uniqueBeanName(generatedBeanName, registry);
 		}
 		return id;

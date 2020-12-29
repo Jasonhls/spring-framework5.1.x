@@ -441,6 +441,7 @@ public class BeanDefinitionParserDelegate {
 		//进一步解析其他所有属性并统一封装到GenericBeanDefinition中
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
+			//如果beanName为空，需要先根据规则生成
 			if (!StringUtils.hasText(beanName)) {
 				try {
 					if (containingBean != null) {
@@ -449,6 +450,7 @@ public class BeanDefinitionParserDelegate {
 								beanDefinition, this.readerContext.getRegistry(), true);
 					}
 					else {
+						//如果containingBean为空，还是先根据规则生成beanName
 						beanName = this.readerContext.generateBeanName(beanDefinition);
 						// Register an alias for the plain bean class name, if still possible,
 						// if the generator returned the class name plus a suffix.
@@ -1433,8 +1435,11 @@ public class BeanDefinitionParserDelegate {
 		if (namespaceUri == null) {
 			return null;
 		}
-		//根据namespaceUri获取自定义的NamespaceHandler
-		//如果这里是被BeanDefinitionParserDelegate调用，那么这里的this.readerContext就是之前创建的，readerContext中的namespaceHandlerResolver是DefaultNamespaceHandlerResolver
+		/**
+		 * 根据namespaceUri获取自定义的NamespaceHandler
+		 * 如果这里是被BeanDefinitionParserDelegate调用，那么这里的this.readerContext就是之前创建的，readerContext中的namespaceHandlerResolver是DefaultNamespaceHandlerResolver
+		 * 这行代码中会把各种自定义的BeanDefinitionParser，缓存到NamespaceHandlerSupport的属性parses中
+		 */
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
