@@ -228,6 +228,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		else {
 			HttpServletRequest request = inputMessage.getServletRequest();
 			List<MediaType> acceptableTypes = getAcceptableMediaTypes(request);
+			//获取当前所有的HttpMessageConverter的属性supportedMediaTypes添加到集合中并返回
 			List<MediaType> producibleTypes = getProducibleMediaTypes(request, valueType, targetType);
 
 			if (body != null && producibleTypes.isEmpty()) {
@@ -288,6 +289,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 								"Writing [" + LogFormatUtils.formatValue(theBody, !traceOn) + "]");
 						addContentDispositionHeader(inputMessage, outputMessage);
 						if (genericConverter != null) {
+							//这里就执行HttpMessageConverter的write方法了，比如FastJsonHttpMessageConverter
 							genericConverter.write(body, targetType, selectedMediaType, outputMessage);
 						}
 						else {

@@ -899,6 +899,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 		configureHandlerExceptionResolvers(exceptionResolvers);
 		if (exceptionResolvers.isEmpty()) {
+			//添加默认的异常处理器
 			addDefaultHandlerExceptionResolvers(exceptionResolvers);
 		}
 		extendHandlerExceptionResolvers(exceptionResolvers);
@@ -945,6 +946,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();
 		exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager());
+		//设置消息转换器
 		exceptionHandlerResolver.setMessageConverters(getMessageConverters());
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());

@@ -577,6 +577,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		if (this.returnValueHandlers == null) {
 			//添加默认的HandlerMethodReturnValueHandler，默认的返回值处理器
+			//比如会添加RequestResponseBodyMethodProcessor，处理被注解@ResponseBody标注的方法的返回值的处理
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			//创建一个HandlerMethodReturnValueHandlerComposite对象，并往它的属性returnValueHandlers(属于List<HandlerMethodReturnValueHandler>)中添加默认的handlers
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
@@ -748,6 +749,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
+		//RequestResponseBodyMethodProcessor是处理@ResponseBody的HandlerMethodReturnValueHandler
 		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(),
 				this.contentNegotiationManager, this.requestResponseBodyAdvice));
 
