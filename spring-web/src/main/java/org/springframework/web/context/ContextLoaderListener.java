@@ -102,6 +102,11 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Initialize the root web application context.
 	 * 初始化根容器的上下文对象
+	 * 	（1）如果是java配置方式，那么配置的过程中会走AbstractDispatcherServletInitializer的onStartup方法，会创建父上下文对象，
+	 * 即AnnotationConfigWebApplicationContext对象，该过程会调用ContextLoaderListener的有参构造函数创建ContextLoaderListener对象
+	 * 并添加到ServletContext对象中，然后tomcat启动过程中，会执行ContextLoaderListener的contextInitialized()方法
+	 * 	（2）如果是xml配置文件的方式，那么tomcat启动过程中，会调用ContextLoaderListener的无参构造函数创建ContextLoaderListener对象，
+	 * 还是会调用ContextLoaderListener的contextInitialized()方法
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
