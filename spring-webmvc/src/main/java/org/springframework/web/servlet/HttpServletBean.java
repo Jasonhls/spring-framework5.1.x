@@ -176,7 +176,9 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		//<--解析xml配置版本的代码 end-->
 
 		// Let subclasses do whatever initialization they like.
-		//调用子类FrameworkServlet来实例化我们的servletBean，这里面会创建启动SpringMvc的子容器
+		/**
+		 *调用子类FrameworkServlet来实例化我们的servletBean，这里面会创建启动SpringMvc的子容器
+		 */
 		initServletBean();
 	}
 

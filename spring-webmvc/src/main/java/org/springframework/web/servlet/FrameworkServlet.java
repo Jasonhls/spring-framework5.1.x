@@ -606,15 +606,22 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 		if (wac == null) {
 			// No context instance is defined for this servlet -> create a local one 单独创建，这个方法通过反射创建WebApplicationContext，然后还是会调用configureAndRefreshWebApplicationContext方法进行上下文刷新
+			/**
+			 * 如果上面this.webApplicationContext为空，就会走下面这个创建子容器的方法
+			 */
 			wac = createWebApplicationContext(rootContext);
 		}
 
+		//上面创建子容器调用子容器的refresh()方法中，会执行上面创建子容器过程中向子容器添加的ContextRefreshListener（是ApplicationListener的子类）对象的onApplicationEvent方法，
+		//该方法会修改当前FrameworkServlet的属性refreshEventReceived值为true
 		if (!this.refreshEventReceived) {
 			// Either the context is not a ConfigurableApplicationContext with refresh
 			// support or the context injected at construction time had already been
 			// refreshed -> trigger initial onRefresh manually here.
 			synchronized (this.onRefreshMonitor) {
-				//这里就会调用DispatcherServlet类的onRefresh方法
+				/**
+				 *这里就会调用DispatcherServlet类的onRefresh方法，DispatcherServlet的onRefresh()方法主要就是初始化DispatcherServlet相关的
+				 */
 				onRefresh(wac);
 			}
 		}
@@ -707,6 +714,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		wac.setServletContext(getServletContext());
 		wac.setServletConfig(getServletConfig());
 		wac.setNamespace(getNamespace());
+		/**
+		 * 会添加ApplicationListener，添加AbstractApplicationContext中的ContextRefreshListener（即ApplicationListener）
+		 * 最后会在AbstractApplicationContext的refresh()方法中的finishRefresh()方法中被调用，ContextRefreshListener主要就是去执行
+		 * DispatcherServlet的onRefresh()方法，并修改FrameworkServlet的属性refreshEventReceived为true
+		 */
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
 		// The wac environment's #initPropertySources will be called in any case when the context
@@ -860,6 +872,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		this.refreshEventReceived = true;
 		synchronized (this.onRefreshMonitor) {
+			//会执行DispatcherServlet的onRefresh()方法
 			onRefresh(event.getApplicationContext());
 		}
 	}

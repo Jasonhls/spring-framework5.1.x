@@ -65,8 +65,11 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 		//3.把我们的根配置类保存到根容器中
 		//4.把ContextLoaderListener注册到servletContext
 		super.onStartup(servletContext);
-		//创建我们的子容器AnnotationConfigWebApplicationContext，此时子容器也是空容器对象
-		//创建DispatcherServlet
+		/**
+		 * 创建我们的子容器AnnotationConfigWebApplicationContext，此时子容器也是空容器对象
+		 * 创建DispatcherServlet
+		 * 如果是xml配置，不会走这里，但是tomcat里面会自动创建javax.servlet.Servlet对象，因此会自动调用javax.servlet.Servlet对象的init()方法
+		 */
 		registerDispatcherServlet(servletContext);
 	}
 

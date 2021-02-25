@@ -281,15 +281,13 @@ public class ContextLoader {
 			// it is available on ServletContext shutdown.
 			/**
 			 * this.context是在调用ContextLoaderListener有参构造器的时候set进去的，
-			 * 为AnnotationConfigWebApplicationContext对象
-			 * 如果这里的context为空，表明是xml方式，xml方式会调用ContextLoaderListener的
-			 * 无参构造器，那么this.context就没有设置，为空
-			 * 这里的判断是2.5到3.0加的
+			 * 如果为java配置方式，父容器为AnnotationConfigWebApplicationContext对象，会调用ContextLoaderListener的有参构造，把context设置进去。
+			 * 如果这里的context为空，表明是xml方式，xml方式会调用ContextLoaderListener的无参构造器，那么this.context就没有设置，为空，这里的判断是2.5到3.0加的
 			 */
 			if (this.context == null) {
 				/**
-				 * 如果是xml配置方式，那么this.context会为空，前面不会设置this.context（如果java config配置方式前面才会设置），
-				 * 所以如果是Xml配置方式，那这里需要创建我们的根容器
+				 * 如果是xml配置方式，只会调用ContextLoaderListener的无参构造，那么this.context会为空，
+				 * 前面不会设置this.context（如果java config配置方式前面才会设置），所以如果是Xml配置方式，那这里需要创建我们的根容器
 				 */
 				this.context = createWebApplicationContext(servletContext);
 			}
