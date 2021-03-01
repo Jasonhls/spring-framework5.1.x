@@ -581,7 +581,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 
 		if (jackson2Present) {
+			//向RequestMappingHandlerAdapter对象的属性requestResponseBodyAdvice中添加JsonViewRequestBodyAdvice对象
 			adapter.setRequestBodyAdvice(Collections.singletonList(new JsonViewRequestBodyAdvice()));
+			//向RequestMappingHandlerAdapter对象的属性requestResponseBodyAdvice中添加JsonViewResponseBodyAdvice对象
 			adapter.setResponseBodyAdvice(Collections.singletonList(new JsonViewResponseBodyAdvice()));
 		}
 

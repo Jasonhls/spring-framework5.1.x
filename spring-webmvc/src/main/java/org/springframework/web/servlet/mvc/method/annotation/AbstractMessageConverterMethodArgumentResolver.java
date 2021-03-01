@@ -102,6 +102,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		Assert.notEmpty(converters, "'messageConverters' must not be empty");
 		this.messageConverters = converters;
 		this.allSupportedMediaTypes = getAllSupportedMediaTypes(converters);
+		//把传进来的requestResponseBodyAdvice赋值给AbstractMessageConverterMethodArgumentResolver的属性advice
 		this.advice = new RequestResponseBodyAdviceChain(requestResponseBodyAdvice);
 	}
 

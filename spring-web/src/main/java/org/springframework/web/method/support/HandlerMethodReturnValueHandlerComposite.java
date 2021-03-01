@@ -80,7 +80,10 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 		if (handler == null) {
 			throw new IllegalArgumentException("Unknown return value type: " + returnType.getParameterType().getName());
 		}
-		//返回值处理器对返回对象值进行处理
+		/**
+		 * 返回值处理器对返回对象值进行处理
+		 * 这里如果是RequestResponseBodyMethodProcessor，那么会遍历调用ResponseBodyAdvice的support方法和beforeBodyWrite
+		 */
 		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 	}
 

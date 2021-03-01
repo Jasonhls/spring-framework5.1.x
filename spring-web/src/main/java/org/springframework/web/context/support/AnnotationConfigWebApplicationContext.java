@@ -265,6 +265,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * @see #getScopeMetadataResolver()
 	 */
 	protected AnnotatedBeanDefinitionReader getAnnotatedBeanDefinitionReader(DefaultListableBeanFactory beanFactory) {
+		//会添加各种处理器
 		return new AnnotatedBeanDefinitionReader(beanFactory, getEnvironment());
 	}
 

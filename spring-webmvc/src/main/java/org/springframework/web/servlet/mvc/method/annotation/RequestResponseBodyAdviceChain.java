@@ -112,7 +112,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	public Object beforeBodyWrite(@Nullable Object body, MethodParameter returnType, MediaType contentType,
 			Class<? extends HttpMessageConverter<?>> converterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
-
+		//会遍历调用ResponseBodyAdvice的support方法和beforeBodyWrite
 		return processBody(body, returnType, contentType, converterType, request, response);
 	}
 
@@ -136,6 +136,9 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 			Class<? extends HttpMessageConverter<?>> converterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
 
+		/**
+		 * 会遍历调用ResponseBodyAdvice的support方法和beforeBodyWrite
+		 */
 		for (ResponseBodyAdvice<?> advice : getMatchingAdvice(returnType, ResponseBodyAdvice.class)) {
 			if (advice.supports(returnType, converterType)) {
 				body = ((ResponseBodyAdvice<T>) advice).beforeBodyWrite((T) body, returnType,

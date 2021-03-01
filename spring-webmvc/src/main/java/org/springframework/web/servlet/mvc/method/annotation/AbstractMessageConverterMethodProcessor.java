@@ -130,6 +130,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
 			@Nullable ContentNegotiationManager manager, @Nullable List<Object> requestResponseBodyAdvice) {
 
+		//调用父类AbstractMessageConverterMethodArgumentResolver的构造方法
 		super(converters, requestResponseBodyAdvice);
 
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
@@ -280,6 +281,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				if (genericConverter != null ?
 						((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) :
 						converter.canWrite(valueType, selectedMediaType)) {
+					/**
+					 * beforeBodyWrite方法里面会遍历调用ResponseBodyAdvice的support方法和beforeBodyWrite
+					 */
 					body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType,
 							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);

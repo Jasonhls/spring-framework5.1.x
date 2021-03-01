@@ -91,7 +91,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	 */
 	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> converters,
 			@Nullable List<Object> requestResponseBodyAdvice) {
-
+		//会调用父类AbstractMessageConverterMethodProcessor的构造方法
 		super(converters, null, requestResponseBodyAdvice);
 	}
 
@@ -101,7 +101,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	 */
 	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> converters,
 			@Nullable ContentNegotiationManager manager, @Nullable List<Object> requestResponseBodyAdvice) {
-
+		//会调用父类AbstractMessageConverterMethodProcessor的构造方法
 		super(converters, manager, requestResponseBodyAdvice);
 	}
 
@@ -178,6 +178,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
 		// Try even with null return value. ResponseBodyAdvice could get involved.
+		/**
+		 * 会遍历调用ResponseBodyAdvice的support方法和beforeBodyWrite
+		 */
 		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
 	}
 

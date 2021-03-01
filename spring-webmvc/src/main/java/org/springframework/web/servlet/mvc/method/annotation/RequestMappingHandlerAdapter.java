@@ -562,7 +562,19 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Override
 	public void afterPropertiesSet() {
 		// Do this first, it may add ResponseBody advice beans
-		//缓存@ControllerAdvice注解注释方法，以异常为key，方法为value的键值对
+		/**
+		 * 缓存@ControllerAdvice注解注释方法，以异常为key，方法为value的键值对
+		 * 这里面就是@ControllerAdvice注解的原理，如果被注解@ControllerAdvice标注，且还是RequestBodyAdvice或ResponseBodyAdvice的子类，
+		 * 那么会被添加RequestMappingHandlerAdapter的属性requestResponseBodyAdvice中，在DispatcherServlet的doDispatch方法中会用到
+		 * AbstractMessageConverterMethodProcessor的属性advice，该属性advice是通过RequestResponseBodyMethodProcessor的构造方法把
+		 * RequestMappingHandlerAdapter对象的属性requestResponseBodyAdvice传递给AbstractMessageConverterMethodProcessor的属性advice的，
+		 * advice属性用途在于遍历调用ResponseBodyAdvice的support和beforeBodyWrite方法，具体的方法调用过程为：
+		 * mv = ha.handle(processedRequest, response, mappedHandler.getHandler())-->RequestMappingHandlerAdapter#invokeHandlerMethod
+		 * -->ServletInvocableHandlerMethod#invokeAndHandle-->HandlerMethodReturnValueHandlerComposite#handleReturnValue
+		 * -->RequestResponseBodyMethodProcessor#handleReturnValue-->AbstractMessageConverterMethodProcessor#writeWithMessageConverters
+		 * -->上一步方法中的body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType, (Class<? extends HttpMessageConverter<?>>) converter.getClass(), inputMessage, outputMessage)
+		 * -->执行beforeBodyWrite方法，该方法里面会遍历调用ResponseBodyAdvice的support方法和beforeBodyWrite方法
+		 */
 		initControllerAdviceCache();
 
 		if (this.argumentResolvers == null) {
@@ -589,12 +601,17 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			return;
 		}
 
-		//获取带有@ControllerAdvice注解的bean的beanName集合
+		/**
+		 * 获取spring容器中所有带有@ControllerAdvice注解的bean的beanName集合
+		 */
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		AnnotationAwareOrderComparator.sort(adviceBeans);
 
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 
+		/**
+		 * 遍历带有@ControllerAdvice注解的beanName集合
+		 */
 		for (ControllerAdviceBean adviceBean : adviceBeans) {
 			Class<?> beanType = adviceBean.getBeanType();
 			if (beanType == null) {
@@ -610,6 +627,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			if (!binderMethods.isEmpty()) {
 				this.initBinderAdviceCache.put(adviceBean, binderMethods);
 			}
+			/**
+			 * 如果beanType(肯定是带有注解@ControllerAdvice)是RequestBodyAdvice或ResponseBodyAdvice的子类，
+			 * 就把当前beanType添加到RequestMappingHandlerAdapter的属性requestResponseBodyAdvice中
+			 */
 			if (RequestBodyAdvice.class.isAssignableFrom(beanType) || ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
 				requestResponseBodyAdviceBeans.add(adviceBean);
 			}
@@ -749,7 +770,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
-		//RequestResponseBodyMethodProcessor是处理@ResponseBody的HandlerMethodReturnValueHandler
+		/**
+		 * RequestResponseBodyMethodProcessor是处理@ResponseBody的HandlerMethodReturnValueHandler
+		 * 会把RequestMappingHandlerAdapter的属性requestResponseBodyAdvice属性传给AbstractMessageConverterMethodArgumentResolver的属性advice
+		 */
 		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(),
 				this.contentNegotiationManager, this.requestResponseBodyAdvice));
 
