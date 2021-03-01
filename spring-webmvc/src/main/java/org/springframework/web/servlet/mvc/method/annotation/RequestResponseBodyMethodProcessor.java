@@ -128,6 +128,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
 		parameter = parameter.nestedIfOptional();
+		/**
+		 * 解析入参，这里会遍历调用RequestBodyAdvice的support()方法，beforeBodyRead()方法以及afterBodyRead()方法
+		 */
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getNestedGenericParameterType());
 		String name = Conventions.getVariableNameForParameter(parameter);
 
@@ -155,6 +158,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		Assert.state(servletRequest != null, "No HttpServletRequest");
 		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
 
+		/**
+		 * 解析入参，这里会遍历调用RequestBodyAdvice的support()方法，beforeBodyRead()方法以及afterBodyRead()方法
+		 */
 		Object arg = readWithMessageConverters(inputMessage, parameter, paramType);
 		if (arg == null && checkRequired(parameter)) {
 			throw new HttpMessageNotReadableException("Required request body is missing: " +

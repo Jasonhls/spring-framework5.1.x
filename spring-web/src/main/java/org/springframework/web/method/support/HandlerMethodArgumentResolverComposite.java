@@ -124,6 +124,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 			throw new IllegalArgumentException("Unsupported parameter type [" +
 					parameter.getParameterType().getName() + "]. supportsParameter should be called first.");
 		}
+		/**
+		 * 如果入参，如果这里的resolver是RequestResponseBodyMethodProcessor，就会遍历调用RequestBodyAdvice的support()方法，beforeBodyRead()方法以及afterBodyRead()方法
+		 */
 		return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 	}
 

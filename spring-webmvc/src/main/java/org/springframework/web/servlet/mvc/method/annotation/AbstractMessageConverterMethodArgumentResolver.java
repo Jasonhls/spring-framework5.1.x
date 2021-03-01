@@ -201,10 +201,16 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
 						(targetClass != null && converter.canRead(targetClass, contentType))) {
 					if (message.hasBody()) {
+						/**
+						 * 这里会遍历调用RequestBodyAdvice的support()方法和beforeBodyRead()方法
+						 */
 						HttpInputMessage msgToUse =
 								getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
 						body = (genericConverter != null ? genericConverter.read(targetType, contextClass, msgToUse) :
 								((HttpMessageConverter<T>) converter).read(targetClass, msgToUse));
+						/**
+						 * 这里会遍历调用RequestBodyAdvice的afterBodyRead()方法
+						 */
 						body = getAdvice().afterBodyRead(body, msgToUse, parameter, targetType, converterType);
 					}
 					else {
