@@ -117,7 +117,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	@Override
 	@Nullable
 	public NamespaceHandler resolve(String namespaceUri) {
-		//获取所有的handlerMappings
+		//获取所有依赖中的所有的handlerMappings，获取读取所有依赖包中META-INFO/spring.handlers文件
 		Map<String, Object> handlerMappings = getHandlerMappings();
 		//根据namespaceUri获取自定义的handler或者handler的className
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);
@@ -140,6 +140,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				/**
 				 * 自定义的init方法会注册自定义的BeanDefinitionParser，把自定义的BeanDefinitionParser放到NamespaceHandlerSupport的属性parsers中
 				 * 比如如果这里的namespaceHandler是AopNamespaceHandler，就会把aspectj-autoproxy，value为AspectJAutoProxyBeanDefinitionParser对象放入AopNamespaceHandler父类属性parsers集合中
+				 * 如果是dubbo，这里就对应dubbo的依赖包中配置的NamespaceHandler，即com.alibaba.dubbo.config.spring.schema.DubboNamespaceHandler
 				 */
 				namespaceHandler.init();
 				//这里的namespaceHandler是一个对象，之前handlerMappings中有同名的key，只是对应的值是string，即handler的全路径名，
@@ -171,8 +172,11 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 						logger.trace("Loading NamespaceHandler mappings from [" + this.handlerMappingsLocation + "]");
 					}
 					try {
-						//去加载mappings，之前创建XmlReaderContext的时候，就创建了默认的DefaultNamespaceHandlerResolver，
-						// 并把META-INF/spring.handlers赋给了DefaultNamespaceHandlerResolver的属性handlerMappingsLocation
+						/**
+						 * 去加载mappings，之前创建XmlReaderContext的时候，就创建了默认的DefaultNamespaceHandlerResolver，
+						 * 并把META-INF/spring.handlers赋给了DefaultNamespaceHandlerResolver的属性handlerMappingsLocation
+						 * 这里会读取所有包中的对应的META-INFO/spring.handlers中的配置，可以全文搜索下哪些包中含有spring.handlers文件
+						 */
 						Properties mappings =
 								PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
 						if (logger.isTraceEnabled()) {

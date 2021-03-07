@@ -1431,21 +1431,25 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		//获取xml文件中element对应的namespaceUri
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;
 		}
 		/**
-		 * 根据namespaceUri获取自定义的NamespaceHandler
+		 * 根据xml文件中定义的namespaceUri获取自定义的NamespaceHandler
 		 * 如果这里是被BeanDefinitionParserDelegate调用，那么这里的this.readerContext就是之前创建的，readerContext中的namespaceHandlerResolver是DefaultNamespaceHandlerResolver
-		 * 这行代码中会把各种自定义的BeanDefinitionParser，缓存到NamespaceHandlerSupport的属性parses中
+		 * 这行代码中会把各种自定义的BeanDefinitionParser，缓存到NamespaceHandlerSupport的属性parses中，然后下面的handler.parse方法，就会根据
+		 * 自定义的BeanDefinitionParser去解析xml文件中的各种标签。
 		 */
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
-		//执行自定义的handler的parse方法
+		/**
+		 *执行自定义的handler的parse方法，也就是解析xml文件中的标签
+		 */
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

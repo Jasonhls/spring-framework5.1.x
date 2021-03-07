@@ -340,6 +340,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
 				}
+				//解析bean定义，解析成BeanDefinition对象并放入spring上下文对象的属性beanDefinitionMap中
 				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 			}
 			finally {
