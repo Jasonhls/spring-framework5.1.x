@@ -76,6 +76,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 			}
 		}
 		// Fallback: generate a unique default bean name.
+		//生成默认的beanName
 		return buildDefaultBeanName(definition, registry);
 	}
 
@@ -151,7 +152,10 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	protected String buildDefaultBeanName(BeanDefinition definition) {
 		String beanClassName = definition.getBeanClassName();
 		Assert.state(beanClassName != null, "No bean class name set");
+		//比如com.cn.service.impl.HelloServiceImpl的一个内部类Single的beanClassName为com.cn.service.impl.HelloServiceImpl$Single
+		//那么经过getShortName，会获取短的className，如果包含$符号，会用.符合去替换$符号，得到的是HelloServiceImpl.Single
 		String shortClassName = ClassUtils.getShortName(beanClassName);
+		//下面这个方法会把shortClassName的第一个字母变成小写的，比如HelloServiceImpl.Single就变成了helloServiceImpl.Single
 		return Introspector.decapitalize(shortClassName);
 	}
 
