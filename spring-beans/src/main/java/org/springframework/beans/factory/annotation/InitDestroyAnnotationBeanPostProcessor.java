@@ -97,6 +97,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the JSR-250 {@link javax.annotation.PostConstruct} annotation.
+	 * 在创建CommonAnnotationBeanPostProcessor对象的时候会调用这个方法，把PostConstruct.class设置进来
 	 */
 	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
 		this.initAnnotationType = initAnnotationType;
@@ -108,6 +109,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the JSR-250 {@link javax.annotation.PreDestroy} annotation.
+	 * 在创建CommonAnnotationBeanPostProcessor对象的时候会调用这个方法，把PreDestroy.class设置进来
 	 */
 	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
 		this.destroyAnnotationType = destroyAnnotationType;
@@ -131,6 +133,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		//获取声明周期的方法，比如被注解@PostConstruct和@PreDestroy注解标注的方法
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
 			metadata.invokeInitMethods(bean, beanName);
@@ -178,6 +181,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
 		if (this.lifecycleMetadataCache == null) {
 			// Happens after deserialization, during destruction...
+			//获取声明周期的方法，比如被注解@PostConstruct和@PreDestroy注解标注的方法
 			return buildLifecycleMetadata(clazz);
 		}
 		// Quick check on the concurrent map first, with minimal locking.
@@ -205,6 +209,8 @@ public class InitDestroyAnnotationBeanPostProcessor
 			final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+				//遍历目标类中的所有方法，被@PostConstruct注解标注的，添加到initMethods集合中，
+				//创建CommonAnnotationBeanPostProcessor对象的时候会把PostConstruct.class赋值给this.initAnnotationType
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
 					currInitMethods.add(element);
@@ -212,6 +218,8 @@ public class InitDestroyAnnotationBeanPostProcessor
 						logger.trace("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
+				//遍历目标类中的所有方法，被@PreDestroy注解标注的，添加到destroyMethods集合中
+				//创建CommonAnnotationBeanPostProcessor对象的时候会把PreDestroy.class赋值给this.destroyAnnotationType
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
 					currDestroyMethods.add(new LifecycleElement(method));
 					if (logger.isTraceEnabled()) {

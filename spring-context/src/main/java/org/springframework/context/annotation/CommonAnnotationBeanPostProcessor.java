@@ -197,6 +197,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * with the init and destroy annotation types set to
 	 * {@link javax.annotation.PostConstruct} and {@link javax.annotation.PreDestroy},
 	 * respectively.
+	 * 在调用AnnotationConfigUtils的registerAnnotationConfigProcessors方法中会把CommonAnnotationBeanPostProcessor添加到DefaultListableBeanFactory的
+	 * beanDefinitionMap中，后面getBean的过程中，会创建实例，通过反射调用下面的构造方法进行创建实例。
 	 */
 	public CommonAnnotationBeanPostProcessor() {
 		setOrder(Ordered.LOWEST_PRECEDENCE - 3);

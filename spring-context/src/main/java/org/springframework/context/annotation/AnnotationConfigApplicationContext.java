@@ -61,10 +61,16 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	/**
 	 * Create a new AnnotationConfigApplicationContext that needs to be populated
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
+	 * SpringBoot中启动类里面SpringApplication的run方法会创建上下文对象，如果是AnnotationConfigApplicationContext，
+	 * 就会调用下面的构造方法创建AnnotationConfigApplicationContext实例
 	 */
 	public AnnotationConfigApplicationContext() {
 		/**
 		 * AnnotationConfigApplicationContext对象的属性reader(即AnnotatedBeanDefinitionReader对象)，
+		 * 创建AnnotatedBeanDefinitionReader对象的方法中会去调用AnnotationConfigUtils的registerAnnotationConfigProcessors方法，
+		 * 该方法将各种处理器对应的beanName和BeanDefinition作为key和value添加到DefaultListableBeanFactory的属性beanDefinitionMap中，
+		 * 后面在refresh()方法的registryBeanPostProcessors方法中，会把添加的各种处理器进行初始化（即调用getBean方法），然后注册到spring容器中
+		 *
 		 * AnnotatedBeanDefinitionReader类的属性conditionEvaluator(即ConditionEvaluator对象)，
 		 * ConditionEvaluator对象中的属性context(即ConditionContextImpl对象)，ConditionContextImpl对象中的属性environment(即StandardEnvironment对象)
 		 * StandardEnvironment对象中属性propertySources（即MutablePropertySources对象），用来存配置的key和value的

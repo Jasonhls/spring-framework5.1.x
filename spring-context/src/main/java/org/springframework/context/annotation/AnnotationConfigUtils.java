@@ -177,6 +177,9 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
+		/**
+		 * 把CommonAnnotationBeanPostProcessor的beanName和beanDefinition添加到spring上下文容器DefaultListableBeanFactory的属性beanDefinitionMap中
+		 */
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
