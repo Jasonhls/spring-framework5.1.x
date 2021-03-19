@@ -265,6 +265,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		//获取spring容器中所有的beanName
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
+		/**
+		 * 遍历spring容器中的beanName，找出符合条件的配置类，加入到candidates集合中
+		 */
 		for (String beanName : candidateNames) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
 			//判断beanDef中是否有属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为full
@@ -272,11 +275,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
 					ConfigurationClassUtils.isLiteConfigurationClass(beanDef)) {
 				if (logger.isDebugEnabled()) {
-					//打印该Bean已经被作为一个configuration执行过，为什么呢？
-					//因为下面的ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)方法中，
-					//解析的beanDef如果有注解@Configuration，那么会给该beanDef中添加一个属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为full
-					//解析的beanDef如果有注解@Component，@ComponentScan，@Import，@ImportResource，或该类方法上包含有注解@Bean，那么
-					//会给该beanDef中添加一个属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为lite
+					/**
+					 * 打印该Bean已经被作为一个configuration执行过，为什么呢？
+					 * 因为下面的ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)方法中，
+					 * 解析的beanDef如果有注解@Configuration，那么会给该beanDef中添加一个属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为full
+					 * 解析的beanDef如果有注解@Component，@ComponentScan，@Import，@ImportResource，或该类方法上包含有注解@Bean，那么
+					 * 会给该beanDef中添加一个属性名为org.springframework.context.annotation.ConfigurationClassPostProcessor.configurationClass，值为lite
+					 */
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
@@ -321,11 +326,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Parse each @Configuration class
-		//这里创建了ConfigurationClassParser对象，然后把几个参数赋给了ConfigurationClassParser对象对应的属性，比如environment
-		//this.environment的值是通过Aware机制把容器的environment传过来的，通过实现EnvironmentAware接口执行setEnvironment方法，
-		//把容器的environment赋给this.environment
-		//构造方法中会创建一个ComponentScanAnnotationParser赋给ConfigurationClassParser的属性componentScanParser
-		//常见的容器的属性environment，resourceLoader等等都会传进去
+		/**
+		 * //这里创建了ConfigurationClassParser对象，然后把几个参数赋给了ConfigurationClassParser对象对应的属性，比如environment
+		 * this.environment的值是通过Aware机制把容器的environment传过来的，通过实现EnvironmentAware接口执行setEnvironment方法，
+		 * 把容器的environment赋给this.environment
+		 * 构造方法中会创建一个ComponentScanAnnotationParser赋给ConfigurationClassParser的属性componentScanParser
+		 * 常见的容器的属性environment，resourceLoader等等都会传进去
+		 */
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
@@ -333,12 +340,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
-			//解析配置的核心逻辑，
-			//带有@Import注解和@ImportResource注解，则会把这两个注解的信息解析出来放入ConfigurationClass的属性importedResources中
-			//带有@ComponentScans，@ComponentScan会直接在这个解析过程中注入到spring容器中
-			//带有@Bean注解的方法会被封装成一个BeanMethod对象，并放入ConfigurationClass的属性beanMethods中
-			//带有@Configuratioin的配置类会在这里注入到spring容器中，但是该配置类中配置的信息不会在这里注入到spring容器中，
-			//而是保存到ConfigurationClassParser的属性configurationClasses中，然后在下面的this.reader.loadBeanDefinitions(configClasses)中去解析
+			/**
+			 * 解析配置的核心逻辑，
+			 * 带有@Import注解和@ImportResource注解，则会把这两个注解的信息解析出来放入ConfigurationClass的属性importedResources中
+			 * 带有@ComponentScans，@ComponentScan会直接在这个解析过程中注入到spring容器中
+			 * 带有@Bean注解的方法会被封装成一个BeanMethod对象，并放入ConfigurationClass的属性beanMethods中
+			 * 带有@Configuratioin的配置类会在这里注入到spring容器中，但是该配置类中配置的信息不会在这里注入到spring容器中，
+			 * 而是保存到ConfigurationClassParser的属性configurationClasses中，然后在下面的this.reader.loadBeanDefinitions(configClasses)中去解析
+			 */
 			parser.parse(candidates);
 			parser.validate();
 
@@ -351,14 +360,19 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
-			//根据ConfigurationClassParser的属性configClasses中的信息，解析配置文件中所引入的配置信息
 			/**
-			 * 这里会执行到ImportBeanDefinitionRegistrar的registerBeanDefinitions方法
+			 * 根据ConfigurationClassParser的属性configClasses中的信息，解析配置文件中所引入的配置信息
+			 * 解析configClasses中的配置，并注入到spring容器的beanDefinitionMap中，会执行到ImportBeanDefinitionRegistrar的registerBeanDefinitions方法
 			 */
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 
 			candidates.clear();
+			/**
+			 * 如果经过了上面的this.reader.loadBeanDefinitions(configClasses)之后，spring容器中的beanDefinition有所增加，
+			 * 就会从新增加的beanDefinition中根据上面一样规则找出符合条件的candidates，如果candidates不为空个，接着执行上面的解析过程，
+			 * 如果candidates为空，跳出解析循环。
+			 */
 			if (registry.getBeanDefinitionCount() > candidateNames.length) {
 				String[] newCandidateNames = registry.getBeanDefinitionNames();
 				Set<String> oldCandidateNames = new HashSet<>(Arrays.asList(candidateNames));
@@ -367,8 +381,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					alreadyParsedClasses.add(configurationClass.getMetadata().getClassName());
 				}
 				for (String candidateName : newCandidateNames) {
+					//排除掉上一轮已经参加过过滤逻辑的beanName
 					if (!oldCandidateNames.contains(candidateName)) {
 						BeanDefinition bd = registry.getBeanDefinition(candidateName);
+						//根据条件进行过滤
 						if (ConfigurationClassUtils.checkConfigurationClassCandidate(bd, this.metadataReaderFactory) &&
 								!alreadyParsedClasses.contains(bd.getBeanClassName())) {
 							candidates.add(new BeanDefinitionHolder(bd, candidateName));
