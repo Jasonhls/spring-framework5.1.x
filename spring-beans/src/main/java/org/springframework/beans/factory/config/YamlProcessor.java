@@ -157,6 +157,13 @@ public abstract class YamlProcessor {
 				logger.debug("Loading from YAML: " + resource);
 			}
 			try (Reader reader = new UnicodeReader(resource.getInputStream())) {
+				/**
+				 * 读取yml后缀的配置文件，yaml.loadAll(reader)，返回是LinkedHashMap，然后map里面的value还是LinkedHashMap
+				 * 比如application.yml中配置server.port，那么LinkedHashMap中有一个key为server，该value是只包含一个键值对的LinkedHashMap，
+				 * 该map的key为port，value为Integer类型，即端口号值，比如8090。
+				 * 比如spring.profile.active，那么LinkedHashMap中有一个key为spring，value为只包含一个键值对的LinkedHashMap，
+				 * 该map的key为profile，value为map类型，key为active，value为local。
+				 */
 				for (Object object : yaml.loadAll(reader)) {
 					if (object != null && process(asMap(object), callback)) {
 						count++;
