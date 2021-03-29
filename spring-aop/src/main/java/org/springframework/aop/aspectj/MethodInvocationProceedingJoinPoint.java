@@ -85,6 +85,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 	@Override
 	public Object proceed() throws Throwable {
+		//复制一个MethodInvocation对象，调用proceed()方法
 		return this.methodInvocation.invocableClone().proceed();
 	}
 

@@ -161,6 +161,10 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		// We start with an index of -1 and increment early.
 		//执行完所有拦截器方法之后，就执行目标切点的方法
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
+			/**
+			 * 如果是jdk动态代理，执行ReflectiveMethodInvocation的invokeJoinpoint()方法
+			 * 如果是cglib动态代理，执行CglibAopProxy的内部类CglibMethodInvocation的invokeJoinpoint()方法
+			 */
 			return invokeJoinpoint();
 		}
 
