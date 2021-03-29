@@ -107,6 +107,11 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 */
 	public Object getProxy(@Nullable ClassLoader classLoader) {
+		/**
+		 * 创建aop代理并获取代理对象，这里的createAopProxy()有可能是JdkDynamicAopProxy，也有可能是ObjenesisCglibAopProxy
+		 * JdkDynamicAopProxy的getProxy返回的是jdk动态代理对象
+		 * ObjenesisCglibAopProxy的getProxy返回的是cglib动态代理Enhancer创建的代理对象
+		 */
 		return createAopProxy().getProxy(classLoader);
 	}
 

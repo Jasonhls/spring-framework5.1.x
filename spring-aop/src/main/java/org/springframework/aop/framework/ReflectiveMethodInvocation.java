@@ -159,12 +159,13 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Nullable
 	public Object proceed() throws Throwable {
 		// We start with an index of -1 and increment early.
-		//执行完所有增强后执行切点方法
+		//执行完所有拦截器方法之后，就执行目标切点的方法
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
 
 		//获取下一个要执行的拦截器
+		//每获取一次，this.currentInterceptorIndex就会增加一次
 		Object interceptorOrInterceptionAdvice =
 				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
@@ -174,13 +175,18 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			InterceptorAndDynamicMethodMatcher dm =
 					(InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
+			//匹配执行
 			if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) {
+				/**
+				 * 拦截器方法执行，比如执行MethodBeforeAdviceAdapter的invoke方法
+				 * 比如执行AfterReturningAdviceInterceptor的invoke方法
+				 */
 				return dm.interceptor.invoke(this);
 			}
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
-				//不匹配则不执行拦截器
+				//不匹配则不执行拦截器，继续递归
 				return proceed();
 			}
 		}

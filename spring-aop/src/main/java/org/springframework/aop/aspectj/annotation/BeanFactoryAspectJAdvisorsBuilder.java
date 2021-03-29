@@ -96,6 +96,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 							this.beanFactory, Object.class, true, false);
 					//循环遍历所有的beanName找出对应的增强方法
 					for (String beanName : beanNames) {
+						//判断是否满足子标签<aop:include/>的配置条件
 						if (!isEligibleBean(beanName)) {
 							continue;
 						}
@@ -106,15 +107,19 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (beanType == null) {
 							continue;
 						}
-						//如果存在Aspect注解
+						//判断是否存在@Aspect注解
 						if (this.advisorFactory.isAspect(beanType)) {
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
+							//单例
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 								//创建获取增强器的工厂
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
-								//获取增强器，这里会判断类的方法上的注解对应的Class是否是Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class
+								/**
+								 * 解析注解的配置
+								 * 获取增强器，这里会判断类的方法上的注解对应的Class是否是Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class
+								 */
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								//把增强器进行缓存，key为beanName，value为该bean所有的增强器集合
 								if (this.beanFactory.isSingleton(beanName)) {

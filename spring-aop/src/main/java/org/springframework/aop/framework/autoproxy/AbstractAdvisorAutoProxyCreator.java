@@ -73,7 +73,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 
-		//找到增强的方法或增强器
+		/**
+		 * 找到增强的方法或增强器的核心逻辑
+		 */
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -92,9 +94,11 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
-		//获取当前beanClass所有的增强器（当前beanClass的方法上有@Pointcut, @Around, @Before, @After, @AfterReturning, @AfterThrowing这几种注解）
+		/**
+		 * 获取当前beanClass所有的增强器（当前beanClass的方法上有@Pointcut, @Around, @Before, @After, @AfterReturning, @AfterThrowing这几种注解）的核心逻辑
+		 */
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
-		//在所有增强中寻找适用于当前bean的增强
+		//在所有增强中寻找适用于当前bean的增强器
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {

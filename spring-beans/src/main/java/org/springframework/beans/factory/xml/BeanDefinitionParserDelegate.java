@@ -1441,6 +1441,9 @@ public class BeanDefinitionParserDelegate {
 		 * 如果这里是被BeanDefinitionParserDelegate调用，那么这里的this.readerContext就是之前创建的，readerContext中的namespaceHandlerResolver是DefaultNamespaceHandlerResolver
 		 * 这行代码中会把各种自定义的BeanDefinitionParser，缓存到NamespaceHandlerSupport的属性parses中，然后下面的handler.parse方法，就会根据
 		 * 自定义的BeanDefinitionParser去解析xml文件中的各种标签。
+		 * 比如这里的namespaceUri为http://www.springframework.org/schema/tx，对应的NamespaceHandler就为org.springframework.transaction.config.TxNamespaceHandler，
+		 * 因为spring-tx包下的META-INF文件夹下的spring.handlers文件中配置了http\://www.springframework.org/schema/tx=org.springframework.transaction.config.TxNamespaceHandler
+		 * 这里的DefaultNamespaceHandlerResolver的resolve方法会把各个包下的META-INF文件下的spring.handlers进行读取并存储起来。
 		 */
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {

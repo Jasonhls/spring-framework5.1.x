@@ -124,8 +124,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
 
 		List<Advisor> advisors = new ArrayList<>();
+		//getAdvisorMethods(aspectClass)获取增强器方法
 		for (Method method : getAdvisorMethods(aspectClass)) {
-			//这里会判断方法上的注解对应的Class是否是Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class
+			/**
+			 * 获取增强器
+			 * 这里会判断方法上的注解对应的Class是否是Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class
+			 */
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 			if (advisor != null) {
 				advisors.add(advisor);
@@ -143,6 +147,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// Find introduction fields.
 		//获得注解@DeclareParents
 		for (Field field : aspectClass.getDeclaredFields()) {
+			//@Declare标签的解析
 			Advisor advisor = getDeclareParentsAdvisor(field);
 			if (advisor != null) {
 				advisors.add(advisor);
@@ -201,16 +206,18 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		validate(aspectInstanceFactory.getAspectMetadata().getAspectClass());
 
-		//判断方法上的注解对应的Class是否Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class
 		//切点信息的获取
+		//判断方法上的注解对应的Class是否Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class这几种Class
 		AspectJExpressionPointcut expressionPointcut = getPointcut(
 				candidateAdviceMethod, aspectInstanceFactory.getAspectMetadata().getAspectClass());
 		if (expressionPointcut == null) {
 			return null;
 		}
 
-		//根据上面获取的切点信息生成增强器
-		//所有的增强都是由Advisor的实现类InstantiationModelAwarePointcut统一封装
+		/**
+		 * 初始化增强器，根据上面获取的切点信息生成增强器
+		 * 所有的增强都是由Advisor的实现类InstantiationModelAwarePointcut统一封装
+		 */
 		return new InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut, candidateAdviceMethod,
 				this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
 	}
@@ -265,7 +272,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		AbstractAspectJAdvice springAdvice;
 
-		//根据不同的注解信息，封装不同的增强器
+		/**
+		 *  根据不同的注解信息，封装不同的增强器
+		 */
 		switch (aspectJAnnotation.getAnnotationType()) {
 			case AtPointcut:
 				if (logger.isDebugEnabled()) {

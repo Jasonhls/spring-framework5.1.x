@@ -126,9 +126,13 @@ public abstract class AopConfigUtils {
 		//如果已经存在了自动代理处理器且存在的自动代理器与现在不一致，那么需要根据优先级来判断到底使用哪个
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			//判断已存在的代理创建器和本次要注册的代理创建器是否是相同的
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
+				//获取已经存在的代理创建器的优先级
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
+				//获取本地要创建的代理创建器的优先级
 				int requiredPriority = findPriorityForClass(cls);
+				//判断优先级，使用优先级高的代理创建器，值越小，优先级越高
 				if (currentPriority < requiredPriority) {
 					//改变bean最重要的就是改变bean所对应的className属性
 					apcDefinition.setBeanClassName(cls.getName());
@@ -152,6 +156,7 @@ public abstract class AopConfigUtils {
 	}
 
 	private static int findPriorityForClass(@Nullable String className) {
+		//返回className对应的class在集合APC_PRIORITY_LIST中的索引值，作为优先级的值
 		for (int i = 0; i < APC_PRIORITY_LIST.size(); i++) {
 			Class<?> clazz = APC_PRIORITY_LIST.get(i);
 			if (clazz.getName().equals(className)) {

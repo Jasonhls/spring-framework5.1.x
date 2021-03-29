@@ -125,6 +125,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 			return null;
 		}
 		else if (handlerOrClassName instanceof NamespaceHandler) {
+			//如果缓存里面有，直接返回即可
 			return (NamespaceHandler) handlerOrClassName;
 		}
 		else {

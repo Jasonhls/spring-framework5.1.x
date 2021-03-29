@@ -102,7 +102,9 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 		if (!this.active) {
 			activate();
 		}
-		//创建代理
+		/**
+		 * 创建aop代理，这里返回的AopProxy有可能是JdkDynamicAopProxy，有可能是ObjenesisCglibAopProxy
+		 */
 		return getAopProxyFactory().createAopProxy(this);
 	}
 

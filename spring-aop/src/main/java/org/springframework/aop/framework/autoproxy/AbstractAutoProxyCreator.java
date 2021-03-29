@@ -296,7 +296,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
-				//如果earlyProxyReferences中不包含这个cacheKey，就需要分装bean
+				//如果earlyProxyReferences中不包含这个cacheKey，则需要代理
+				/**
+				 * 获取代理的核心逻辑，要么是JdkDynamicAopProxy创建的代理对象，要么为ObjenesisCglibAopProxy创建的代理对象
+				 * 如果想看代理对象执行方法的逻辑：
+				 * JdkDynamicAopProxy实现了InvocationHandler，所以看其实现的invoke方法
+				 * ObjenesisCglibAopProxy方式的拦截器为DynamicAdvisedInterceptor对象，该对象实现了MethodInterceptor，因此执行方法的核心逻辑在interceptor方法，
+				 * 而cglib方式的拦截器会被封装在Enhancer的属性callbacks中
+				 */
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -348,11 +355,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		}
 
 		// Create proxy if we have advice.
-		//获取增强的方法或增强器
+		/**
+		 * 获取增强的方法或增强器的核心逻辑
+		 */
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
-			//根据获取的增强创建代理
+			/**
+			 * 根据获取的增强创建代理
+			 */
 			Object proxy = createProxy(
 					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 			this.proxyTypes.put(cacheKey, proxy.getClass());
@@ -459,7 +470,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		}
 
 		ProxyFactory proxyFactory = new ProxyFactory();
-		//获取当前类中的属性
+		//复制当前对象的相关属性
 		proxyFactory.copyFrom(this);
 		//决定对于给定的bean是否应该使用targetClass而不是它的接口代理
 		//检查proxyTargetClass设置以及preserveTargetClass属性
@@ -487,7 +498,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			proxyFactory.setPreFiltered(true);
 		}
 
-		//进行获取代理的操作
+		/**
+		 * 创建代理
+		 */
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 
