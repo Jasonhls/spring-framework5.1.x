@@ -167,6 +167,7 @@ abstract public class KeyFactory {
 	public static KeyFactory create(ClassLoader loader, Class keyInterface, KeyFactoryCustomizer customizer,
 			List<KeyFactoryCustomizer> next) {
 		Generator gen = new Generator();
+		//设置Generator的interface属性值为Enhancer的内部类EnhancerKey.class
 		gen.setInterface(keyInterface);
 		// SPRING PATCH BEGIN
 		gen.setContextClass(keyInterface);
@@ -181,6 +182,9 @@ abstract public class KeyFactory {
 			}
 		}
 		gen.setClassLoader(loader);
+		/**
+		 * 生成KeyFactory，会创建代理Class和Class对应的name
+		 */
 		return gen.create();
 	}
 
@@ -233,7 +237,11 @@ abstract public class KeyFactory {
 		}
 
 		public KeyFactory create() {
+			//这里的keyInterface为Enhancer的内部类EnhancerKey.class，因此它的name为org.springframework.cglib.proxy.Enhancer$EnhancerKey
 			setNamePrefix(keyInterface.getName());
+			/**
+			 * 创建KeyFactory核心逻辑，里面会生成代理对象的Class
+			 */
 			return (KeyFactory) super.create(keyInterface.getName());
 		}
 

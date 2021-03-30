@@ -104,13 +104,20 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 				throw new IllegalArgumentException("classLoader == null is not yet supported");
 			}
 			this.classLoader = new WeakReference<ClassLoader>(classLoader);
+			/**
+			 * 定义load的方法体逻辑
+			 */
 			Function<AbstractClassGenerator, Object> load =
 					new Function<AbstractClassGenerator, Object>() {
 						public Object apply(AbstractClassGenerator gen) {
+							/**
+							 * 生成cglib代理对象Class的核心逻辑
+							 */
 							Class klass = gen.generate(ClassLoaderData.this);
 							return gen.wrapCachedClass(klass);
 						}
 					};
+			//把上面的load赋值给LoadingCache对象，并赋值给generatedClasses
 			generatedClasses = new LoadingCache<AbstractClassGenerator, Object, Object>(GET_KEY, load);
 		}
 
@@ -131,6 +138,8 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 				return gen.generate(ClassLoaderData.this);
 			}
 			else {
+				//在创建ClassLoaderData对象，调用ClassLoaderData构造方法，该构造方法中有定义LoadingCache的属性loader的apply方法体逻辑
+				//这里的generatedClasses为LoadingCache对象，下面这行代码会调用到LoadingCache的属性loader的apply方法，
 				Object cachedValue = generatedClasses.get(gen);
 				return gen.unwrapCachedValue(cachedValue);
 			}
@@ -174,6 +183,9 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 	}
 
 	private String generateClassName(Predicate nameTestPredicate) {
+		/**
+		 * getClassName，生成cglib代理对象的Class的name的核心逻辑
+		 */
 		return namingPolicy.getClassName(namePrefix, source.name, key, nameTestPredicate);
 	}
 
@@ -309,6 +321,9 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 					data = cache.get(loader);
 					if (data == null) {
 						Map<ClassLoader, ClassLoaderData> newCache = new WeakHashMap<ClassLoader, ClassLoaderData>(cache);
+						/**
+						 * 这里有生成代理对象Class的逻辑
+						 */
 						data = new ClassLoaderData(loader);
 						newCache.put(loader, data);
 						CACHE = newCache;
@@ -316,6 +331,7 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 				}
 			}
 			this.key = key;
+			//这里会调用上面data = new ClassLoaderData(loader)中定义的LoadingCache对象（会被赋值给ClassLoaderData对象的属性generatedClasses）的属性loader的apply方法的方法体
 			Object obj = data.get(this, getUseCache());
 			if (obj instanceof Class) {
 				return firstInstance((Class) obj);
@@ -342,6 +358,9 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 						"Please file an issue at cglib's issue tracker.");
 			}
 			synchronized (classLoader) {
+				/**
+				 * 生成cglib代理对象的name的核心逻辑
+				 */
 				String name = generateClassName(data.getUniqueNamePredicate());
 				data.reserveName(name);
 				this.setClassName(name);

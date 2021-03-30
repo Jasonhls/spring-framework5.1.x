@@ -100,6 +100,9 @@ public class Enhancer extends AbstractClassGenerator {
 
 	private static final Source SOURCE = new Source(Enhancer.class.getName());
 
+	/**
+	 * 这里面会初始化KEY_FACTORY，同时会创建代理对象Class，包括Class的name
+	 */
 	private static final EnhancerKey KEY_FACTORY =
 			(EnhancerKey) KeyFactory.create(EnhancerKey.class, KeyFactory.HASH_ASM_TYPE, null);
 
@@ -558,6 +561,10 @@ public class Enhancer extends AbstractClassGenerator {
 
 	private Object createHelper() {
 		preValidate();
+		/**
+		 * 这里获取的key，已经cglib代理对象了，比如为Enhancer$EnhancerKey$$KeyFactoryByCGLIB$$4ce19e8f@3111
+		 * 这里的代理对象的Class的name是怎么来的，查看KEY_FACTORY的初始化过程
+		 */
 		Object key = KEY_FACTORY.newInstance((superclass != null) ? superclass.getName() : null,
 				ReflectUtils.getNames(interfaces),
 				filter == ALL_ZERO ? null : new WeakCacheKey<CallbackFilter>(filter),
