@@ -499,7 +499,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		}
 
 		/**
-		 * 创建代理
+		 * 创建代理，返回代理对象
 		 */
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}

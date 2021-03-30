@@ -208,7 +208,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 			// Generate the proxy class and create a proxy instance.
 			/**
-			 * 生成代理类以及创建代理
+			 * 创建cglib代理对象，并返回
 			 */
 			return createProxyClassAndInstance(enhancer, callbacks);
 		}
@@ -672,6 +672,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
+		/**
+		 *  下面这个方法在使用Cglib动态代理时，代理对象执行目标类方法的时候会被调用
+		 */
 		@Override
 		@Nullable
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
@@ -708,6 +711,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					// We need to create a method invocation...
 					/**
 					 * 否则创建CglibMethodInvocation（继承了用于JDK动态代理的ReflectiveMethodInvocation）对象，
+					 * 由于CglibMethodInvocation继承了ReflectiveMethodInvocation，因此执行proceed()方法就会调用ReflectiveMethodInvocation的proceed()方法
 					 * 用来执行拦截器链的拦截方法
 					 */
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
