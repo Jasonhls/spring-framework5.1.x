@@ -122,7 +122,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		Class<?>[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
 		/**
-		 * 创建代理
+		 * 创建jdk代理
+		 * 核心流程跟踪：
+		 * 调用Proxy的newProxyInstance方法--->调用getProxyClass0方法--->proxyClassCache.get(loader, interfaces)--->supplier.get()，这里的supplier为WeakCache的内部类Factory
+		 * --->valueFactory.apply(key, parameter)，这里的valueFactory为Proxy的内部类ProxyClassFactory；
+		 * Proxy的内部ProxyClassFactory的apply方法中会定义jdk动态代理的Class，并且有生成该Class的name的规则，jdk动态代理对象Class的name比如为com.sun.proxy.$Proxy15
 		 */
 		return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 	}

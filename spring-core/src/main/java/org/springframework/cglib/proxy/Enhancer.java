@@ -102,6 +102,7 @@ public class Enhancer extends AbstractClassGenerator {
 
 	/**
 	 * 这里面会初始化KEY_FACTORY，同时会创建代理对象Class，包括Class的name
+	 * 创建cglib代理对象的Class的核心逻辑，以及生成Class的name的核心逻辑
 	 */
 	private static final EnhancerKey KEY_FACTORY =
 			(EnhancerKey) KeyFactory.create(EnhancerKey.class, KeyFactory.HASH_ASM_TYPE, null);
@@ -380,10 +381,12 @@ public class Enhancer extends AbstractClassGenerator {
 	 * callbacks (if any) to create a new object instance.
 	 * Uses the no-arg constructor of the superclass.
 	 * @return a new instance
+	 * 创建cglib代理对象
 	 */
 	public Object create() {
 		classOnly = false;
 		argumentTypes = null;
+		//创建cglib代理的逻辑
 		return createHelper();
 	}
 
