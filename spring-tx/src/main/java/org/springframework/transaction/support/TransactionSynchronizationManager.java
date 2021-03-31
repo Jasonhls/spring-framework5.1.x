@@ -133,15 +133,18 @@ public abstract class TransactionSynchronizationManager {
 	 * @return a value bound to the current thread (usually the active
 	 * resource object), or {@code null} if none
 	 * @see ResourceTransactionManager#getResourceFactory()
+	 * 这里的入参key是DataSource，即数据源
 	 */
 	@Nullable
 	public static Object getResource(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+		//把dataSource作为key，去ThreadLocal取出ConnectionHolder
 		Object value = doGetResource(actualKey);
 		if (value != null && logger.isTraceEnabled()) {
 			logger.trace("Retrieved value [" + value + "] for key [" + actualKey + "] bound to thread [" +
 					Thread.currentThread().getName() + "]");
 		}
+		//返回ConnectionHolder
 		return value;
 	}
 
@@ -150,6 +153,7 @@ public abstract class TransactionSynchronizationManager {
 	 */
 	@Nullable
 	private static Object doGetResource(Object actualKey) {
+		//从ThreadLocal中取出一个map
 		Map<Object, Object> map = resources.get();
 		if (map == null) {
 			return null;

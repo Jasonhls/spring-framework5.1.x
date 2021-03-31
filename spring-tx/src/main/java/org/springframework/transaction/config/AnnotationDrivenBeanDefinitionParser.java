@@ -62,6 +62,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		registerTransactionalEventListenerFactory(parserContext);
 		String mode = element.getAttribute("mode");
+		//mode默认值是proxy
 		if ("aspectj".equals(mode)) {
 			// mode="aspectj"
 			registerTransactionAspect(element, parserContext);
@@ -126,6 +127,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				Object eleSource = parserContext.extractSource(element);
 
 				// Create the TransactionAttributeSource definition.
+				/**
+				 * 创建一个AnnotationTransactionAttributeSource的BeanDefinition，
+				 * 它的作用类似与一个pointcut切入点，主要是判断方法或者类是否含有@Transactional注解
+				 */
 				RootBeanDefinition sourceDef = new RootBeanDefinition(
 						"org.springframework.transaction.annotation.AnnotationTransactionAttributeSource");
 				sourceDef.setSource(eleSource);
@@ -133,6 +138,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				String sourceName = parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
 
 				// Create the TransactionInterceptor definition.
+				/**
+				 * 创建了一个TransactionInterceptor的BeanDefinition，
+				 * 它的作用主要是拦截器，拦截@Transactional注解，进行后续事务的一些处理
+				 */
 				RootBeanDefinition interceptorDef = new RootBeanDefinition(TransactionInterceptor.class);
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -141,6 +150,11 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
 				// Create the TransactionAttributeSourceAdvisor definition.
+				/**
+				 * 创建了一个BeanFactoryTransactionAttributeSourceAdvisor的BeanDefinition，
+				 * 它是一个真正的切面对象它包含了拦截器Interceptor(TransactionInterceptor)、
+				 * 切入点pointcut(AnnotationTransactionAttributeSource)，提供给Spring Aop使用
+				 */
 				RootBeanDefinition advisorDef = new RootBeanDefinition(BeanFactoryTransactionAttributeSourceAdvisor.class);
 				advisorDef.setSource(eleSource);
 				advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

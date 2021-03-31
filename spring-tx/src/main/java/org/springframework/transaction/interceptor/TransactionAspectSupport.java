@@ -279,34 +279,48 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			final InvocationCallback invocation) throws Throwable {
 
 		// If the transaction attribute is null, the method is non-transactional.
+		/**
+		 * 获取对应事务属性，如果事务属性为空（则目标方法不存在事务）
+		 * 如果项目使用@Transactional注解，那么这里就对应Transactional注解的值
+		 * 如果项目使用了<tx:attributes>，就是标签配置的属性的值。
+		 */
 		TransactionAttributeSource tas = getTransactionAttributeSource();
+		//根据事务的属性获取beanFactory的PlatformTransactionManager(spring事务管理器的顶级接口)，
+		// 一般这里是DataSourceTransactionManager
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
+		//如果事务属性为空，或者tm不是编程式事务管理器
 		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
 			// Standard transaction demarcation with getTransaction and commit/rollback calls.
+			//判断是否需要创建一个事务，根据事务传播行为做出相应的处理
 			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
 
 			Object retVal;
 			try {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
+				//执行下一个拦截器
 				retVal = invocation.proceedWithInvocation();
 			}
 			catch (Throwable ex) {
 				// target invocation exception
+				//异常回滚
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
 			}
 			finally {
+				//清除事务
 				cleanupTransactionInfo(txInfo);
 			}
+			//提交事务
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
 		}
 
 		else {
+			//否则走编程式事务处理逻辑
 			final ThrowableHolder throwableHolder = new ThrowableHolder();
 
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
@@ -472,6 +486,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
+				/**
+				 * 获取一个TransactionStatus对象，返回的是DefaultTransactionStatus对象，这个对象主要包含了当前的Transaction、
+				 * 挂起的Transaction、并且还有一个很重要的标识newTransaction（这个标识表明当前的Transaction是否为全新的，
+				 * 后面再提交事务的时候有用到）、还有一个savepoint。
+				 */
 				status = tm.getTransaction(txAttr);
 			}
 			else {
@@ -481,6 +500,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			}
 		}
+		/**
+		 * 会返回一个TransactionInfo对象，并且这个对象绑定在ThreadLocal。
+		 */
 		return prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 	}
 
@@ -496,6 +518,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			@Nullable TransactionAttribute txAttr, String joinpointIdentification,
 			@Nullable TransactionStatus status) {
 
+		//创建一个新的TransactionInfo
 		TransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);
 		if (txAttr != null) {
 			// We need a transaction for this method...
@@ -517,6 +540,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		// We always bind the TransactionInfo to the thread, even if we didn't create
 		// a new transaction here. This guarantees that the TransactionInfo stack
 		// will be managed correctly even if no transaction was created by this aspect.
+		//把TransactionInfo绑定到线程上，也就是ThreadLocal
 		txInfo.bindToThread();
 		return txInfo;
 	}
@@ -531,6 +555,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			if (logger.isTraceEnabled()) {
 				logger.trace("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
+			//调用事务管理器的commit方法，这里就是DataSourceTransactionManager
 			txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());
 		}
 	}
