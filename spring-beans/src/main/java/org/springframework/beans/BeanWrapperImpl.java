@@ -338,6 +338,9 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 			}
 			else {
 				ReflectionUtils.makeAccessible(writeMethod);
+				/**
+				 * 利用反射，执行写方法，比如setXXX方法，value是入参，getWrappedInstance()获取的是当前bean实例对象，writeMethod就是setXXX方法对象
+				 */
 				writeMethod.invoke(getWrappedInstance(), value);
 			}
 		}

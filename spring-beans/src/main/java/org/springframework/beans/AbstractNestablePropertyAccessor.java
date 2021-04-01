@@ -264,10 +264,15 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			if (nestedPa == this) {
 				pv.getOriginalPropertyValue().resolvedTokens = tokens;
 			}
-			//设置propertyValue
+			/**
+			 * 填充属性值的核心逻辑
+			 */
 			nestedPa.setPropertyValue(tokens, pv);
 		}
 		else {
+			/**
+			 * 填充属性值的核心逻辑
+			 */
 			setPropertyValue(tokens, pv);
 		}
 	}
@@ -277,6 +282,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			processKeyedProperty(tokens, pv);
 		}
 		else {
+			/**
+			 * bean实例对象属性值填充的核心逻辑
+			 */
 			processLocalProperty(tokens, pv);
 		}
 	}
@@ -457,6 +465,11 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				}
 				pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 			}
+			/**
+			 * 属性值填充核心逻辑，
+			 * 如果是DirectFieldAccessor内部类FieldPropertyHandler，就会通过反射，填充字段的值
+			 * 如果是BeanWrapperImpl的BeanPropertyHandler，就会通过反射，执行setXXX方法，给属性赋值
+			 */
 			ph.setValue(valueToApply);
 		}
 		catch (TypeMismatchException ex) {

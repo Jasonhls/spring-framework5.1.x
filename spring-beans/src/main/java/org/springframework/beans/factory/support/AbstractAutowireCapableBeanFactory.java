@@ -1504,6 +1504,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			/**
 			 * 解析RootBeanDefinition的父类属性propertyValues（是MutablePropertyValues对象）的属性propertyValueList（是List<PropertyValue>集合）
 			 * 这里的pvs是当前bean的bean定义对象的属性propertyValues（普通属性集合），如果有值，需要设置到bean实例的属性中
+			 * 填充属性的核心逻辑
 			 */
 			applyPropertyValues(beanName, mbd, bw, pvs);
 		}
@@ -1763,7 +1764,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				String propertyName = pv.getName();
 				Object originalValue = pv.getValue();
 				/**
-				 * 这里返回的是Bean实例对象
+				 * 这里返回resolveValue的是Bean实例对象，这个方法传入的originalValue是RootBeanDefinition，然后会去spring容器中欧获取对应的bean实例并返回
 				 */
 				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
 				Object convertedValue = resolvedValue;
@@ -1800,7 +1801,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Set our (possibly massaged) deep copy.
 		try {
-			//如果当前bean定义对象AbstractBeanDefinition中属性propertyValues有值，就会在这里设置到对象的属性中了
+			/**
+			 * 如果当前bean定义对象AbstractBeanDefinition中属性propertyValues有值，就会在这里设置到对象的属性中了
+			 * 填充属性的核心逻辑
+			 */
 			bw.setPropertyValues(new MutablePropertyValues(deepCopy));
 		}
 		catch (BeansException ex) {
