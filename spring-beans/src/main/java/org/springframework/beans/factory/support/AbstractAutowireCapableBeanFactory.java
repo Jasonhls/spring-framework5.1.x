@@ -1476,6 +1476,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 					if (pvsToUse == null) {
 						if (filteredPds == null) {
+							/**
+							 *  获取当前bean的方法、属性等等各种描述器集合
+							 */
 							filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 						}
 						pvsToUse = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
@@ -1489,6 +1492,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		if (needsDepCheck) {
 			if (filteredPds == null) {
+				/**
+				 *  获取当前bean的方法、属性等等各种描述器集合
+				 */
 				filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 			}
 			checkDependencies(beanName, mbd, filteredPds, pvs);
@@ -1496,6 +1502,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (pvs != null) {
 			/**
+			 * 解析RootBeanDefinition的父类属性propertyValues（是MutablePropertyValues对象）的属性propertyValueList（是List<PropertyValue>集合）
 			 * 这里的pvs是当前bean的bean定义对象的属性propertyValues（普通属性集合），如果有值，需要设置到bean实例的属性中
 			 */
 			applyPropertyValues(beanName, mbd, bw, pvs);
@@ -1618,10 +1625,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #filterPropertyDescriptorsForDependencyCheck(org.springframework.beans.BeanWrapper)
 	 */
 	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw, boolean cache) {
+		//先从缓存里面获取
 		PropertyDescriptor[] filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
 		if (filtered == null) {
+			/**
+			 * 获取当前bean的方法、属性等等各种描述器集合
+			 */
 			filtered = filterPropertyDescriptorsForDependencyCheck(bw);
 			if (cache) {
+				//存入缓存
 				PropertyDescriptor[] existing =
 						this.filteredPropertyDescriptorsCache.putIfAbsent(bw.getWrappedClass(), filtered);
 				if (existing != null) {
@@ -1640,6 +1652,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #isExcludedFromDependencyCheck
 	 */
 	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw) {
+		/**
+		 * bw.getPropertyDescriptors()方法就是获取当前bean的方法、属性等等各种描述器集合
+		 */
 		List<PropertyDescriptor> pds = new ArrayList<>(Arrays.asList(bw.getPropertyDescriptors()));
 		pds.removeIf(this::isExcludedFromDependencyCheck);
 		return pds.toArray(new PropertyDescriptor[0]);
@@ -1734,6 +1749,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (converter == null) {
 			converter = bw;
 		}
+		//传入spring的上下文对象到BeanDefinitionValueResolver中
 		BeanDefinitionValueResolver valueResolver = new BeanDefinitionValueResolver(this, beanName, mbd, converter);
 
 		// Create a deep copy, resolving any references for values.
@@ -1746,6 +1762,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else {
 				String propertyName = pv.getName();
 				Object originalValue = pv.getValue();
+				/**
+				 * 这里返回的是Bean实例对象
+				 */
 				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
 				Object convertedValue = resolvedValue;
 				//下面的isWritableProperty会从CachedIntrospectionResults中获取属性描述器的缓存，并赋值给当前实例的BeanWrapperImpl对象的属性cachedIntrospectionResults

@@ -60,10 +60,14 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	@Override
 	@Nullable
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
-		//解析自定义标签，并执行自定义的AbstractSingleBeanDefinitionParser的doParse方法
+		/**
+		 * 解析自定义标签，并执行自定义的AbstractSingleBeanDefinitionParser的doParse方法
+		 * 当前类没有这个方法，就往上找，即去父类找这个方法
+		 */
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (definition != null && !parserContext.isNested()) {
 			try {
+				//获取xml配置文件中的id，比如获取<tx:advice>标签中的id
 				String id = resolveId(element, definition, parserContext);
 				if (!StringUtils.hasText(id)) {
 					parserContext.getReaderContext().error(
@@ -77,6 +81,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 						aliases = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
 					}
 				}
+				//这里把id作为beanName，然后注入到spring上下文的beanDefinitionMap中，后面会进行bean实例化
 				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id, aliases);
 				//注册自定义的bean到spring容器中
 				registerBeanDefinition(holder, parserContext.getRegistry());

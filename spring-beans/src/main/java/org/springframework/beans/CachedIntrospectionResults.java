@@ -174,7 +174,8 @@ public final class CachedIntrospectionResults {
 		}
 
 		/**
-		 * 该构造方法中，会获取属性描述器并存放到缓存中
+		 * 获取当前beanClass的属性描述器集合的核心逻辑
+		 * 该构造方法中，会获取当前类的方法，属性等等描述器集合并存放到缓存中
 		 */
 		results = new CachedIntrospectionResults(beanClass);
 		ConcurrentMap<Class<?>, CachedIntrospectionResults> classCacheToUse;
@@ -252,7 +253,6 @@ public final class CachedIntrospectionResults {
 		 * 该方法会反射获取beanClass中所有的方法，然后判断是不是is，get，set开头的，然后根据参数个数和方法返回值类型去做判断，
 		 * 获取到beanInfo的信息
 		 */
-
 		return (shouldIntrospectorIgnoreBeaninfoClasses ?
 				Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :
 				Introspector.getBeanInfo(beanClass));
@@ -279,8 +279,11 @@ public final class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-			//获取beanClass对应的bean信息
-			//使用的方法是Introspector.getBeanInfo(beanClass)（该方法是jdk中自带的）去获取这个Class的bean信息，包括各种方法，属性
+			/**
+			 * 获取beanClass的属性描述器集合
+			 * 获取beanClass对应的bean信息
+			 * 使用的方法是Introspector.getBeanInfo(beanClass)（该方法是jdk中自带的）去获取这个Class的bean信息，包括各种方法，属性(以描述器的方式体现)
+			 */
 			this.beanInfo = getBeanInfo(beanClass);
 
 			if (logger.isTraceEnabled()) {
@@ -303,7 +306,7 @@ public final class CachedIntrospectionResults {
 							(pd.getPropertyEditorClass() != null ?
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
-				//创建属性描述器
+				//把上面的PropertyDescriptor用GenericTypeAwarePropertyDescriptor对象进行封装
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
 				//然后放入缓存propertyDescriptorCache中
 				this.propertyDescriptorCache.put(pd.getName(), pd);

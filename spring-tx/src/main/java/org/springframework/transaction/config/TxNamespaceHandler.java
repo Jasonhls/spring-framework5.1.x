@@ -50,6 +50,9 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 
+	/**
+	 * 如果是xml配置文件的方式，会走下面这个逻辑
+	 */
 	@Override
 	public void init() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());

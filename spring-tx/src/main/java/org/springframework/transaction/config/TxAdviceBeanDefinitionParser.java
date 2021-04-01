@@ -73,6 +73,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+		//这里往BeanDefinitionBuilder的AbstractBeanDefinition的属性propertyValues的属性propertyValueList集合中添加PropertyValue对象
 		builder.addPropertyReference("transactionManager", TxNamespaceHandler.getTransactionManagerName(element));
 
 		List<Element> txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES_ELEMENT);
@@ -83,7 +84,14 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		else if (txAttributes.size() == 1) {
 			// Using attributes source.
 			Element attributeSourceElement = txAttributes.get(0);
+			//解析标签<tx:attributes>及其子标签
 			RootBeanDefinition attributeSourceDefinition = parseAttributeSource(attributeSourceElement, parserContext);
+			/**
+			 * builder为BeanDefinitionBuilder，封装了TransactionInterceptor的BeanDefinition，
+			 * 新建一个PropertyValue，name为transactionAttributeSource，value为上一步返回的NameMatchTransactionAttributeSource的BeanDefinition。
+			 * 把这个PropertyValue添加到BeanDefinitionBuilder的AbstractBeanDefinition(其beanClass为TransactionInterceptor.class)的属性propertyValues的属性propertyValueList集合中，
+			 * 上面已经添加了一个PropertyValue，这样就有两个了
+			 */
 			builder.addPropertyValue("transactionAttributeSource", attributeSourceDefinition);
 		}
 		else {
@@ -94,11 +102,13 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	}
 
 	private RootBeanDefinition parseAttributeSource(Element attrEle, ParserContext parserContext) {
+		//解析<tx:method>标签
 		List<Element> methods = DomUtils.getChildElementsByTagName(attrEle, METHOD_ELEMENT);
 		ManagedMap<TypedStringValue, RuleBasedTransactionAttribute> transactionAttributeMap =
 				new ManagedMap<>(methods.size());
 		transactionAttributeMap.setSource(parserContext.extractSource(attrEle));
 
+		//遍历<tx:method>标签解析出来的方法
 		for (Element methodEle : methods) {
 			String name = methodEle.getAttribute(METHOD_NAME_ATTRIBUTE);
 			TypedStringValue nameHolder = new TypedStringValue(name);
@@ -138,11 +148,17 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 			}
 			attribute.setRollbackRules(rollbackRules);
 
+			//key中封装了标签<tx:method>的name，attribute为RuleBasedTransactionAttribute对象，里面设置了标签<tx:method>中其他的属性
 			transactionAttributeMap.put(nameHolder, attribute);
 		}
 
+		//定义一个NameMatchTransactionAttributeSource的BeanDefinition，并返回
 		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
 		attributeSourceDefinition.setSource(parserContext.extractSource(attrEle));
+		/**
+		 * 往RootBeanDefinition的父属性MutablePropertyValues的属性propertyValueList加入一个PropertyValue对象，
+		 * PropertyValue的属性name值为nameMap，value为transactionAttributeMap（里面存放了解析标签<tx:method>的信息）
+		 */
 		attributeSourceDefinition.getPropertyValues().add("nameMap", transactionAttributeMap);
 		return attributeSourceDefinition;
 	}

@@ -72,8 +72,11 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		//从NamespaceHandlerSupport对象的缓存属性this.parsers中获取BeanDefinitionParser对象
 		BeanDefinitionParser parser = findParserForElement(element, parserContext);
-		//执行parser的parse方法
-		//如果这里是AspectJAutoProxyBeanDefinitionParser对象，就会执行该类的parse方法
+		/**
+		 * 执行parser的parse方法
+		 * 如果这里是AspectJAutoProxyBeanDefinitionParser对象，就会执行该类的parse方法
+		 * 如果这里是解析<tx:advice>标签，那么这里的parser就是TxAdviceBeanDefinitionParser对象，如果没有parse方法，就去父类找该方法
+		 */
 		return (parser != null ? parser.parse(element, parserContext) : null);
 	}
 
@@ -84,7 +87,10 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	@Nullable
 	private BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
 		String localName = parserContext.getDelegate().getLocalName(element);
-		//之前获取NamespaceHandler对象的时候，就把自定义的AbstractSingleBeanDefinitionParser放到NamespaceHandlerSupport的属性parser中了
+		/**
+		 * 之前获取NamespaceHandler对象的时候，就把自定义的AbstractSingleBeanDefinitionParser放到NamespaceHandlerSupport的属性parser中了
+		 * 比如这里的this为TxNamespaceHandler，local为advice，那么获取得到的BeanDefinitionParser就为TxAdviceBeanDefinitionParser
+		 */
 		BeanDefinitionParser parser = this.parsers.get(localName);
 		if (parser == null) {
 			parserContext.getReaderContext().fatal(
