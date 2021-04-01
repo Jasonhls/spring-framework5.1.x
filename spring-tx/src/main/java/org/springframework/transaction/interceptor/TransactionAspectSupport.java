@@ -283,12 +283,19 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		 * 获取对应事务属性，如果事务属性为空（则目标方法不存在事务）
 		 * 如果项目使用@Transactional注解，那么这里就对应Transactional注解的值
 		 * 如果项目使用了<tx:attributes>，就是标签配置的属性的值。
+		 * 这里返回的TransactionAttributeSource是NameMatchTransactionAttributeSource对象
 		 */
 		TransactionAttributeSource tas = getTransactionAttributeSource();
 		//根据事务的属性获取beanFactory的PlatformTransactionManager(spring事务管理器的顶级接口)，
-		// 一般这里是DataSourceTransactionManager
+		/**
+		 * 在通过<tx:method>标签解析出来的TransactionAttribute集合中寻找匹配当前方法的TransactionAttribute对象。
+		 */
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
+		/**
+		 * 返回TransactionInterceptor的父类属性transactionManager，即DataSourceTransactionManager对象
+		 */
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
+		//获取方法全路径名，比如com.cn.transactionManager.service.AccountServiceImpl.addAccount
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 		//如果事务属性为空，或者tm不是编程式事务管理器
@@ -301,20 +308,30 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			try {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
-				//执行下一个拦截器
+				/**
+				 * 执行下一个拦截器
+				 */
 				retVal = invocation.proceedWithInvocation();
 			}
 			catch (Throwable ex) {
 				// target invocation exception
-				//异常回滚
+				/**
+				 * 如果发生异常，
+				 * 第一步需要进行异常回滚，
+				 * 第二步，需要把异常抛出来
+				 */
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
 			}
 			finally {
-				//清除事务
+				/**
+				 * 清除事务
+				 */
 				cleanupTransactionInfo(txInfo);
 			}
-			//提交事务
+			/**
+			 * 提交事务
+			 */
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
 		}
@@ -347,6 +364,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						}
 					}
 					finally {
+						/**
+						 * 清除事务
+						 */
 						cleanupTransactionInfo(txInfo);
 					}
 				});
@@ -490,6 +510,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				 * 获取一个TransactionStatus对象，返回的是DefaultTransactionStatus对象，这个对象主要包含了当前的Transaction、
 				 * 挂起的Transaction、并且还有一个很重要的标识newTransaction（这个标识表明当前的Transaction是否为全新的，
 				 * 后面再提交事务的时候有用到）、还有一个savepoint。
+				 * 这里的tm为DataSourceTransactionManager
 				 */
 				status = tm.getTransaction(txAttr);
 			}
@@ -574,6 +595,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 			if (txInfo.transactionAttribute != null && txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
+					/**
+					 * 事务回滚
+					 */
 					txInfo.getTransactionManager().rollback(txInfo.getTransactionStatus());
 				}
 				catch (TransactionSystemException ex2) {

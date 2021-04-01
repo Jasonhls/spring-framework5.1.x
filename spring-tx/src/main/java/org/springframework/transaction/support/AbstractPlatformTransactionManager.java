@@ -339,8 +339,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 */
 	@Override
 	public final TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException {
-		//这里主要是调用了PlatformTransactionManager的doGetTransaction方法去生成一个事务，
-		// 比如这里调用的是DataSourceTransactionManager
+		/**
+		 * 这里主要是调用了PlatformTransactionManager的doGetTransaction方法去生成一个事务，
+		 * 当前this为DataSourceTransactionManager
+		 */
 		Object transaction = doGetTransaction();
 
 		// Cache debug flag to avoid repeated checks.
@@ -852,6 +854,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 
 		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
+		/**
+		 * 处理回滚
+		 */
 		processRollback(defStatus, false);
 	}
 
@@ -868,16 +873,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			try {
 				triggerBeforeCompletion(status);
 
+				//如果有savepoint
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Rolling back transaction to savepoint");
 					}
+					//回滚到savepoint
 					status.rollbackToHeldSavepoint();
 				}
+				//如果是一个新事务
 				else if (status.isNewTransaction()) {
 					if (status.isDebug()) {
 						logger.debug("Initiating transaction rollback");
 					}
+					//进行回滚
 					doRollback(status);
 				}
 				else {

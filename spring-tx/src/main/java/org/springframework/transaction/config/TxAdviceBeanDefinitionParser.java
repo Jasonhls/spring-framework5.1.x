@@ -84,13 +84,17 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		else if (txAttributes.size() == 1) {
 			// Using attributes source.
 			Element attributeSourceElement = txAttributes.get(0);
-			//解析标签<tx:attributes>及其子标签
+			/**
+			 * 解析标签<tx:attributes>及其子标签
+			 * 这里返回的是NameMatchTransactionAttributeSource的RootBeanDefinition
+			 */
 			RootBeanDefinition attributeSourceDefinition = parseAttributeSource(attributeSourceElement, parserContext);
 			/**
 			 * builder为BeanDefinitionBuilder，封装了TransactionInterceptor的BeanDefinition，
 			 * 新建一个PropertyValue，name为transactionAttributeSource，value为上一步返回的NameMatchTransactionAttributeSource的BeanDefinition。
 			 * 把这个PropertyValue添加到BeanDefinitionBuilder的AbstractBeanDefinition(其beanClass为TransactionInterceptor.class)的属性propertyValues的属性propertyValueList集合中，
-			 * 上面已经添加了一个PropertyValue，这样就有两个了
+			 * 上面已经添加了一个PropertyValue，这样就有两个了，后面getBean实例化bean的过程中，会进行填充属性，
+			 * 会把NameMatchTransactionAttributeSource这个bean赋值给TransactionInterceptor的父类属性transactionAttributeSource。
 			 */
 			builder.addPropertyValue("transactionAttributeSource", attributeSourceDefinition);
 		}

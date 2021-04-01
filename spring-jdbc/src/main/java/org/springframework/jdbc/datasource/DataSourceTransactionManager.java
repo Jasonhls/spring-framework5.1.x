@@ -239,6 +239,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		 * 创建一个DataSourceTransactionObject对象，该对象主要用于存储数据库连接Connection对象，和一些Connection的状态标识
 		 */
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
+		//在DataSourceTransactionManager的无参构造方法中会设置nestedTransactionAllowed为true
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 		/**
 		 * TransactionSynchronizationManager对象有一个ThreadLocal变量，用于存储当前线程的ConnectionHolder，
@@ -370,6 +371,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.debug("Rolling back JDBC transaction on Connection [" + con + "]");
 		}
 		try {
+			/**
+			 * 调用Connection.rollback()方法
+			 */
 			con.rollback();
 		}
 		catch (SQLException ex) {

@@ -106,11 +106,22 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 		}
 
 		// Look for direct name match.
+		//获取方法名
 		String methodName = method.getName();
+		/**
+		 * this.nameMap里面存放的是解析标签<tx:method>出来的信息，
+		 * this.nameMap的key中封装了标签<tx:method>的name，value为RuleBasedTransactionAttribute对象，里面设置了标签<tx:method>中其他的属性
+		 * 具体可以查看TxAdviseBeanDefinitionParser的doParse方法，里面有相关逻辑。
+		 * 所有的BeanDefinitionParser的在解析bean定义的过程中，都会被调用parse方法，而TxAdviseBeanDefinitionParser的parse方法中会调用它的doParse方法。
+		 */
 		TransactionAttribute attr = this.nameMap.get(methodName);
 
+		//如果<tx:method>标签中，不包含当前方法名
 		if (attr == null) {
 			// Look for most specific name match.
+			/**
+			 * 就遍历<tx:method>解析出来的名称，跟当前方法名进行模糊匹配，如果匹配上了就返回对应的TransactionAttribute对象
+			 */
 			String bestNameMatch = null;
 			for (String mappedName : this.nameMap.keySet()) {
 				if (isMatch(methodName, mappedName) &&
