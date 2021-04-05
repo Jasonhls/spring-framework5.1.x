@@ -120,6 +120,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static class AopAutoProxyConfigurer {
 
 		public static void configureAutoProxyCreator(Element element, ParserContext parserContext) {
+			/**
+			 * 会把InfrastructureAdvisorAutoProxyCreator注入到spring容器中
+			 */
 			AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 
 			String txAdvisorBeanName = TransactionManagementConfigUtils.TRANSACTION_ADVISOR_BEAN_NAME;
@@ -128,7 +131,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 				// Create the TransactionAttributeSource definition.
 				/**
-				 * 创建一个AnnotationTransactionAttributeSource的BeanDefinition，
+				 * 创建一个AnnotationTransactionAttributeSource事务注解属性解析器BeanDefinition对象，
 				 * 它的作用类似与一个pointcut切入点，主要是判断方法或者类是否含有@Transactional注解
 				 */
 				RootBeanDefinition sourceDef = new RootBeanDefinition(
@@ -139,7 +142,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 				// Create the TransactionInterceptor definition.
 				/**
-				 * 创建了一个TransactionInterceptor的BeanDefinition，
+				 * 创建了一个TransactionInterceptor事务拦截器BeanDefinition对象，
 				 * 它的作用主要是拦截器，拦截@Transactional注解，进行后续事务的一些处理
 				 */
 				RootBeanDefinition interceptorDef = new RootBeanDefinition(TransactionInterceptor.class);
@@ -151,7 +154,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 				// Create the TransactionAttributeSourceAdvisor definition.
 				/**
-				 * 创建了一个BeanFactoryTransactionAttributeSourceAdvisor的BeanDefinition，
+				 * 创建了一个BeanFactoryTransactionAttributeSourceAdvisor事务切面解析器的BeanDefinition对象，
 				 * 它是一个真正的切面对象它包含了拦截器Interceptor(TransactionInterceptor)、
 				 * 切入点pointcut(AnnotationTransactionAttributeSource)，提供给Spring Aop使用
 				 */

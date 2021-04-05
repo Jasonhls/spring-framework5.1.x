@@ -70,6 +70,10 @@ public class BeanFactoryAdvisorRetrievalHelper {
 		if (advisorNames == null) {
 			// Do not initialize FactoryBeans here: We need to leave all regular beans
 			// uninitialized to let the auto-proxy creator apply to them!
+			/**
+			 * 会获取到BeanFactoryTransactionAttributeSourceAdvisor的beanName，如果是xml配置方式，在TxNamespaceHandler的init方法中会注入AnnotationDrivenBeanDefinitionParser对象，
+			 * 而启动过程中，会执行到该BeanDefinitionParser的parse方法，该方法会注入BeanFactoryTransactionAttributeSourceAdvisor的beanDefinition到spring的beanDefinitionMap中
+			 */
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.beanFactory, Advisor.class, true, false);
 			this.cachedAdvisorBeanNames = advisorNames;
@@ -88,7 +92,9 @@ public class BeanFactoryAdvisorRetrievalHelper {
 				}
 				else {
 					try {
-						//创建bean并添加到增强器集合汇总返回
+						/**
+						 * 通过getBean创建bean实例对象并添加到增强器对象集合返回，比如BeanFactoryTransactionAttributeSourceAdvisor对象
+						 */
 						advisors.add(this.beanFactory.getBean(name, Advisor.class));
 					}
 					catch (BeanCreationException ex) {

@@ -284,11 +284,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		 * 如果项目使用@Transactional注解，那么这里就对应Transactional注解的值
 		 * 如果项目使用了<tx:attributes>，就是标签配置的属性的值。
 		 * 这里返回的TransactionAttributeSource是NameMatchTransactionAttributeSource对象
+		 * 如果使用的是Java config方式，这里获取的TransactionAttributeSource是AnnotationTransactionAttributeSource对象
 		 */
 		TransactionAttributeSource tas = getTransactionAttributeSource();
 		//根据事务的属性获取beanFactory的PlatformTransactionManager(spring事务管理器的顶级接口)，
 		/**
-		 * 在通过<tx:method>标签解析出来的TransactionAttribute集合中寻找匹配当前方法的TransactionAttribute对象。
+		 * 如果是xml方式：TransactionAttributeSource是NameMatchTransactionAttributeSource对象，
+		 *     在通过<tx:method>标签解析出来的TransactionAttribute集合中寻找匹配当前方法的TransactionAttribute对象。
+		 * 如果是通过@Transactional注解：这里获取的TransactionAttributeSource是AnnotationTransactionAttributeSource对象，
+		 *     AnnotationTransactionAttributeSource的父类方法getTransactionAttribute方法中有解析@Transactional注解信息的核心逻辑。
+		 *     AnnotationTransactionAttributeSource的父类是AbstractFallbackTransactionAttributeSource。
 		 */
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
 		/**

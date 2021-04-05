@@ -93,15 +93,19 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 		this.publicMethodsOnly = publicMethodsOnly;
 		if (jta12Present || ejb3Present) {
 			this.annotationParsers = new LinkedHashSet<>(4);
+			//@Transactional 注解解析器
 			this.annotationParsers.add(new SpringTransactionAnnotationParser());
 			if (jta12Present) {
+				//jta解析器
 				this.annotationParsers.add(new JtaTransactionAnnotationParser());
 			}
 			if (ejb3Present) {
+				//Ejb解析器
 				this.annotationParsers.add(new Ejb3TransactionAnnotationParser());
 			}
 		}
 		else {
+			//@Transactional 注解解析器
 			this.annotationParsers = Collections.singleton(new SpringTransactionAnnotationParser());
 		}
 	}
@@ -140,12 +144,20 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	@Override
 	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
+		/**
+		 * 如果TransactionAnnotationParser是SpringTransactionAnnotationParser，就会对@Transactional注解进行解析，
+		 * 即解析类上带有注解@Transactional的核心逻辑
+		 */
 		return determineTransactionAttribute(clazz);
 	}
 
 	@Override
 	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Method method) {
+		/**
+		 * 如果TransactionAnnotationParser是SpringTransactionAnnotationParser，就会对@Transactional注解进行解析，
+		 * 即解析方法上带有注解@Transactional的核心逻辑
+		 */
 		return determineTransactionAttribute(method);
 	}
 
@@ -161,6 +173,10 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 */
 	@Nullable
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
+		/**
+		 * 这里的annotationParsers在创建AnnotationTransactionAttributeSource实例对象的时候，就已经初始化了，比如
+		 * SpringTransactionAnnotationParser对象，它的parseTransactionAnnotation方法，专门解析类或方法上的@Transactional注解的
+		 */
 		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
 			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(element);
 			if (attr != null) {
