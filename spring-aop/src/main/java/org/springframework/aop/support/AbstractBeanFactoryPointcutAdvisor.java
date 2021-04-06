@@ -103,6 +103,11 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 
 	@Override
 	public Advice getAdvice() {
+		/**
+		 * 比如这里是BeanFactoryTransactionAttributeSourceAdvisor，那么
+		 * 如果是java config方式，在ProxyTransactionManagementConfiguration这个配置类中将BeanFactoryTransactionAttributeSourceAdvisor实例
+		 *     注入到spring容器中，已经设置了advice属性为TransactionInterceptor实例
+		 */
 		Advice advice = this.advice;
 		if (advice != null) {
 			return advice;
@@ -111,6 +116,15 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		Assert.state(this.adviceBeanName != null, "'adviceBeanName' must be specified");
 		Assert.state(this.beanFactory != null, "BeanFactory must be set to resolve 'adviceBeanName'");
 
+		/**
+		 * 比如这里是BeanFactoryTransactionAttributeSourceAdvisor，那么
+		 * 如果是xml方式，只有adviceBeanName有值，会进行getBean获取得到advice对象并赋值给advice属性。
+		 * 什么时候设置的adviceBeanName，就是在TxNamespaceHandler的init方法中添加了AnnotationDrivenBeanDefinitionParser，这个对象的parse方法中，
+		 * 会定义BeanFactoryTransactionAttributeSourceAdvisor的bean定义，会把adviceBeanName作为key，value为TransactionInterceptor的beanName，放入
+		 * 到该bean定义的propertySource集合中，在getBean方法的populate方法中，会进行属性填充，即会遍历beanDefinition的propertySource，然后去把
+		 * BeanFactoryTransactionAttributeSourceAdvisor的属性adviceBeanName的值设置为TransactionInterceptor的beanName，然后下面这里getBean(this.adviceBeanName, Advice.class)
+		 * 获取到spring容器中的TransactionInterceptor实例，设置给this.advice。
+		 */
 		if (this.beanFactory.isSingleton(this.adviceBeanName)) {
 			// Rely on singleton semantics provided by the factory.
 			advice = this.beanFactory.getBean(this.adviceBeanName, Advice.class);

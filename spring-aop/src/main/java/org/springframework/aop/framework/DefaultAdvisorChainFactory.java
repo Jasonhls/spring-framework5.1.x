@@ -78,6 +78,8 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 					if (match) {
 						/**
 						 *  获取方法拦截器数组
+						 *  比如被@Transactional注解标注的方法或类，该类会被进行cglib动态代理，执行方法的时候会走这里，
+						 * 获取的拦截器链中有一个拦截器TransactionInterceptor。
 						 */
 						MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
 						if (mm.isRuntime()) {

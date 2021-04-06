@@ -84,6 +84,19 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 	@Override
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
 		List<MethodInterceptor> interceptors = new ArrayList<>(3);
+		/**
+		 * 如果是@Transactional注解，生成的cglib动态代理对象执行方法，会走到这里，
+		 * 对应的advisor为BeanFactoryTransactionAttributeSourceAdvisor对象，
+		 * 该对象的属性advice值为spring中的TransactionInterceptor实例对象，原因如下：
+		 *     如果是java配置方式：在@EnableTransactionManagement注解中，
+		 * 有一个selector为TransactionManagementConfigurationSelector，该类的import方法引入的配置类包括
+		 * ProxyTransactionManagementConfiguration，而该配置类中，引入了BeanFactoryTransactionAttributeSourceAdvisor
+		 * 这个bean实例，并且把spring中TransactionInterceptor实例设置到该类的advice属性中了
+		 *     如果是xml方式，原理参考BeanFactoryTransactionAttributeSourceAdvice的getAdvice()方法的逻辑，该逻辑里面会getBean(this.adviceBeanName, Advisor.class)，
+		 * 其中的this.adviceBeanName是在TxNamespaceHandler的init方法中定义的AnnotationDrivenBeanDefinitionParser的parse方法中，定义
+		 * BeanFactoryTransactionAttributeSourceAdvisor的beanDefinition中，将adviceBeanName作为key，value为TransactionInterceptor的beanName设置到
+		 * 该bean定义的propertySource中，在getBean的populate方法中会填充属性的，即会把beanDefinition的propertySource进行赋值。
+		 */
 		Advice advice = advisor.getAdvice();
 		if (advice instanceof MethodInterceptor) {
 			interceptors.add((MethodInterceptor) advice);

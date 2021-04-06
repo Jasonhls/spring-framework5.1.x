@@ -162,6 +162,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				advisorDef.setSource(eleSource);
 				advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				advisorDef.getPropertyValues().add("transactionAttributeSource", new RuntimeBeanReference(sourceName));
+				/**
+				 * 这里把TransactionInterceptor的beanName添加到BeanFactoryTransactionAttributeSourceAdvisor的bean定义对象中，在getBean的时候，
+				 * 在populate方法中会填充属性，
+				 */
 				advisorDef.getPropertyValues().add("adviceBeanName", interceptorName);
 				if (element.hasAttribute("order")) {
 					advisorDef.getPropertyValues().add("order", element.getAttribute("order"));
