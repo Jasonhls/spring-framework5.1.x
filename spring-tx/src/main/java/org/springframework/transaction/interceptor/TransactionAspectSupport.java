@@ -283,17 +283,23 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		 * 获取对应事务属性，如果事务属性为空（则目标方法不存在事务）
 		 * 如果项目使用@Transactional注解，那么这里就对应Transactional注解的值
 		 * 如果项目使用了<tx:attributes>，就是标签配置的属性的值。
-		 * 这里返回的TransactionAttributeSource是NameMatchTransactionAttributeSource对象
-		 * 如果使用的是Java config方式，这里获取的TransactionAttributeSource是AnnotationTransactionAttributeSource对象
+		 * 第一种：使用xml方式添加事务切面和切点，这里获取的TransactionAttributeSource是NameMatchTransactionAttributeSource对象
+		 * 第二种：xml中开启事务注解支持加@Transactional注解，
+		 * 第三种：使用纯注解方式，@EnableTransactionManagement + @Transactional + @EnableAspectJAutoProxy，
+		 * 第二种和第三种方式中，这里获取的TransactionAttributeSource都是AnnotationTransactionAttributeSource对象
 		 */
 		TransactionAttributeSource tas = getTransactionAttributeSource();
 		//根据事务的属性获取beanFactory的PlatformTransactionManager(spring事务管理器的顶级接口)，
 		/**
-		 * 如果是xml方式：TransactionAttributeSource是NameMatchTransactionAttributeSource对象，
-		 *     在通过<tx:method>标签解析出来的TransactionAttribute集合中寻找匹配当前方法的TransactionAttribute对象。
-		 * 如果是通过@Transactional注解：这里获取的TransactionAttributeSource是AnnotationTransactionAttributeSource对象，
-		 *     AnnotationTransactionAttributeSource的父类方法getTransactionAttribute方法中有解析@Transactional注解信息的核心逻辑。
-		 *     AnnotationTransactionAttributeSource的父类是AbstractFallbackTransactionAttributeSource。
+		 * 获取事务信息的核心逻辑：
+		 *     第一种：xml方式添加事务（配置事务的切面和切点），那这里的TransactionAttributeSource是NameMatchTransactionAttributeSource对象，
+		 * 在通过<tx:method>标签解析出来的TransactionAttribute集合中寻找匹配当前方法的TransactionAttribute对象。
+		 *     第二种：通过@Transactional注解添加事务（开启事务注解支持加@Transactional注解）。
+		 *     第三种：使用纯注解方式，@EnableTransactionManagement + @Transactional + @EnableAspectJAutoProxy。
+		 * 第二种和第三种方式，这里的TransactionAttributeSource都是AnnotationTransactionAttributeSource对象，
+		 * AnnotationTransactionAttributeSource的父类是AbstractFallbackTransactionAttributeSource。
+		 *
+		 * AnnotationTransactionAttributeSource的父类方法getTransactionAttribute方法中有解析@Transactional注解信息的核心逻辑。
 		 */
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
 		/**

@@ -164,7 +164,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		// First try is the method in the target class.
 		/**
-		 * 首先，试图从实现类的方法上获取事务属性，里面有解析@Transactional注解的核心逻辑
+		 * 第一，试图从实现类的方法上获取事务属性，里面有解析@Transactional注解的核心逻辑
 		 */
 		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
 		if (txAttr != null) {
