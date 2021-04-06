@@ -86,6 +86,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @param targetClass the target class for this invocation (may be {@code null})
 	 * @return a TransactionAttribute for this method, or {@code null} if the method
 	 * is not transactional
+	 *
+	 * 在TransactionInterceptor的invoke方法中会调用TransactionAspectSupport的invokeWithinTransaction方法，
+	 * 该方法中会调用下面的getTransactionAttribute方法
 	 */
 	@Override
 	@Nullable
