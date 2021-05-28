@@ -162,6 +162,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.config.setRegisteredSuffixPatternMatch(this.useRegisteredSuffixPatternMatch);
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
 
+		//初始化带有@Controller注解或@RequestMapping注解修饰的类中的方法
 		super.afterPropertiesSet();
 	}
 
