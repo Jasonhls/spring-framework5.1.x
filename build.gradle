@@ -1,5 +1,6 @@
 buildscript {
 	repositories {
+		mavenCentral()
 		maven { url "https://maven.aliyun.com/repository/spring-plugin" }
 		maven { url "https://maven.aliyun.com/nexus/content/repositories/spring-plugin" }
 		maven { url "https://repo.spring.io/plugins-release" }
@@ -13,7 +14,7 @@ buildscript {
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
 	id "io.spring.dependency-management" version "1.0.7.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.2.71" apply false
+	id "org.jetbrains.kotlin.jvm" version "1.5.30" apply false
 	id "org.jetbrains.dokka" version "0.9.18"
 	id "org.asciidoctor.convert" version "1.5.8"
 }
@@ -37,7 +38,7 @@ ext {
 	jackson2Version      = "2.9.9"
 	jettyVersion         = "9.4.27.v20200227"
 	junit5Version        = "5.3.2"
-	kotlinVersion        = "1.2.71"
+	kotlinVersion        = "1.5.30"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.47.Final"
 	reactorVersion       = "Californium-SR16"
