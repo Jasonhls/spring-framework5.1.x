@@ -146,6 +146,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			 * 如果autoStartupOnly为true，bean必须实现SmartLifecycle接口，并且该bean的isAutoStartup()方法必须返回true，否则不会被加入到LifecycleGroup中
 			 */
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
+				//如果是Phased接口实现类，返回getPhase方法返回值，否则返回0
 				int phase = getPhase(bean);
 				LifecycleGroup group = phases.get(phase);
 				if (group == null) {
@@ -155,6 +156,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
 					phases.put(phase, group);
 				}
+				//add方法中，把beanName和bean封装到LifecycleGroupMember对象中，并把LifecycleGroupMember添加到group的members属性集合中
 				group.add(beanName, bean);
 			}
 		});
@@ -189,6 +191,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					logger.trace("Starting bean '" + beanName + "' of type [" + bean.getClass().getName() + "]");
 				}
 				try {
+					/**
+					 * 核心启动方法：执行Lifecycle实现类的start方法，
+					 * 比如springboot中上下文类型为Reactive，通过Lifecycle实现类org.springframework.boot.web.reactive.context.WebServerStartStopLifecycle
+					 * 执行其start方法来启动容器(上下文类型为Reactive，默认容器为Netty容器)
+					 * 若springboot中上下文类型为Servlet，通过Lifecycle实现类org.springframework.boot.web.servlet.context.WebServerStartStopLifecycle
+					 * 执行其start方法来启动容器(上下文类型为Servlet，默认容器为为tomcat容器)
+					 */
 					bean.start();
 				}
 				catch (Throwable ex) {
@@ -288,14 +297,18 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	protected Map<String, Lifecycle> getLifecycleBeans() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		Map<String, Lifecycle> beans = new LinkedHashMap<>();
+		//从spring容器的beanDefinitions里面寻找Lifecycle.class类型的beanName集合
 		String[] beanNames = beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		for (String beanName : beanNames) {
 			String beanNameToRegister = BeanFactoryUtils.transformedBeanName(beanName);
 			boolean isFactoryBean = beanFactory.isFactoryBean(beanNameToRegister);
+			//如果是FactoryBean，beanName前面添加一个&
 			String beanNameToCheck = (isFactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+			//如果是单例bean，且不是FactoryBean或Lifecycle的子类，或是SmartLifecycle的子类
 			if ((beanFactory.containsSingleton(beanNameToRegister) &&
 					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck, beanFactory))) ||
 					matchesBeanType(SmartLifecycle.class, beanNameToCheck, beanFactory)) {
+				//通过getBean获取实例添加到集合中返回
 				Object bean = beanFactory.getBean(beanNameToCheck);
 				if (bean != this && bean instanceof Lifecycle) {
 					beans.put(beanNameToRegister, (Lifecycle) bean);
@@ -367,6 +380,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			Collections.sort(this.members);
 			for (LifecycleGroupMember member : this.members) {
+				/**
+				 * 一个LifecycleGroupMember封装了beanName和一个Lifecycle的实现类bean
+				 */
 				doStart(this.lifecycleBeans, member.name, this.autoStartupOnly);
 			}
 		}

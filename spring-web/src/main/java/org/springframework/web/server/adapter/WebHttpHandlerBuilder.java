@@ -153,6 +153,8 @@ public final class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
+		//这里获取到的WebHandler类型的bean为通过@EnableWebFlux解析配置类WebFluxConfigurationSupport中创建的DispatcherHandler实例(属于WebHandler子类)
+		//封装到WebHttpHandlerBuilder中
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
@@ -358,9 +360,11 @@ public final class WebHttpHandlerBuilder {
 	 */
 	public HttpHandler build() {
 
+		//this.webHandler为通过@EnableWebFlux注入的DispatcherHandler实例
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
+		//创建HttpWebHandlerAdapter对象，封装DispatcherHandler实例，并返回
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
 		if (this.sessionManager != null) {
 			adapted.setSessionManager(this.sessionManager);
