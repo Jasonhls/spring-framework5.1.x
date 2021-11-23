@@ -139,6 +139,11 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 
+	/**
+	 * 处理响应式Http请求的核心方法
+	 * @param exchange the current server exchange
+	 * @return
+	 */
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
 		if (this.handlerMappings == null) {

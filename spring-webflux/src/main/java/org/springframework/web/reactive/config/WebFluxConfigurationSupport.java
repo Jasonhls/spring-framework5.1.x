@@ -109,7 +109,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 
-	//注入DispatcherHandler实例，属于WebHandler的子类
+	//注入DispatcherHandler实例，属于WebHandler的子类，注册到spring容器中后，bean的名称叫做webHandler
 	@Bean
 	public DispatcherHandler webHandler() {
 		return new DispatcherHandler();

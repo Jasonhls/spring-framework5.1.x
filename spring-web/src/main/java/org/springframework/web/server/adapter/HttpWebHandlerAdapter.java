@@ -221,17 +221,28 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 
+	/**
+	 * 处理响应式http请求的核心方法
+	 * @param request current request
+	 * @param response current response
+	 * @return
+	 */
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		if (this.forwardedHeaderTransformer != null) {
 			request = this.forwardedHeaderTransformer.apply(request);
 		}
+		//将ServerHttpRequest和ServerHttpResponse合并成ServerWebExchange
 		ServerWebExchange exchange = createExchange(request, response);
 
 		LogFormatUtils.traceDebug(logger, traceOn ->
 				exchange.getLogPrefix() + formatRequest(exchange.getRequest()) +
 						(traceOn ? ", headers=" + formatHeaders(exchange.getRequest().getHeaders()) : ""));
 
+		/**
+		 * 处理响应式http请求的核心方法，getDelegate()方法返回的是ExceptionHandingWebHandler对象，
+		 * 具体可以参考SpringBoot中reactive环境的启动过程
+		 */
 		return getDelegate().handle(exchange)
 				.doOnSuccess(aVoid -> logResponse(exchange))
 				.onErrorResume(ex -> handleUnresolvedError(exchange, ex))

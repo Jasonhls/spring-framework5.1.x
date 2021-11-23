@@ -65,6 +65,7 @@ public class DefaultWebFilterChain implements WebFilterChain {
 	public DefaultWebFilterChain(WebHandler handler, List<WebFilter> filters) {
 		Assert.notNull(handler, "WebHandler is required");
 		this.allFilters = Collections.unmodifiableList(filters);
+		//将通过@EnableWebFlux注入的DispatcherHandler实例赋值给DefaultWebFilterChain的handler属性
 		this.handler = handler;
 		DefaultWebFilterChain chain = initChain(filters, handler);
 		this.currentFilter = chain.currentFilter;
@@ -116,6 +117,11 @@ public class DefaultWebFilterChain implements WebFilterChain {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange) {
+		/**
+		 * 处理Http请求的核心方法
+		 * 如果filter采用链式设计模式，如果没有下一个就执行this.handler(为DispatcherHandler对象)的handle方法，
+		 * 即执行DispatcherHandler的handle方法
+		 */
 		return Mono.defer(() ->
 				this.currentFilter != null && this.next != null ?
 						this.currentFilter.filter(exchange, this.next) :

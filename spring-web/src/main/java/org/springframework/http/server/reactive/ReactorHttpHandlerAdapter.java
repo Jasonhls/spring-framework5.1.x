@@ -51,6 +51,12 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 	}
 
 
+	/**
+	 * 处理响应式的Http请求的核心方法
+	 * @param reactorRequest
+	 * @param reactorResponse
+	 * @return
+	 */
 	@Override
 	public Mono<Void> apply(HttpServerRequest reactorRequest, HttpServerResponse reactorResponse) {
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
@@ -62,6 +68,10 @@ public class ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, 
 				response = new HttpHeadResponseDecorator(response);
 			}
 
+			/**
+			 * 处理http请求的核心方法
+			 * this.httpHandler为SpringBoot中的WebServerManager的内部类DelayedInitializationHttpHandler对象
+			 */
 			return this.httpHandler.handle(request, response)
 					.doOnError(ex -> logger.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
 					.doOnSuccess(aVoid -> logger.trace(request.getLogPrefix() + "Handling completed"));

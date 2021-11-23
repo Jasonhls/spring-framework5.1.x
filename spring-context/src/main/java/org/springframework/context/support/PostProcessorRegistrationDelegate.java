@@ -93,7 +93,9 @@ final class PostProcessorRegistrationDelegate {
 			}
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
-			//执行处理器逻辑，这里得到的currentRegistryProcessors其实是ConfigurationClassPostProcessor
+			/**
+			 * 执行处理器逻辑，这里得到的currentRegistryProcessors其实是ConfigurationClassPostProcessor，这个处理器会解析bean定义
+			 */
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 

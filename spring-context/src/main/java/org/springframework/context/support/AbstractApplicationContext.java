@@ -526,7 +526,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Tell the subclass to refresh the internal bean factory.
 			/**
 			 * 2.获取告诉子类初始化Bean工厂
-			 * 会解析bean定义文件，并解析成BeanDefinition对象放入到spring上下文对象的属性beanDefinitionMap中
+			 * 如果上下文对象是AbstractRefreshableApplicationContext的子类（比如AnnotationConfigWebApplicationContext，
+			 * ClassPathXmlApplicationContext，还有XmlWebApplicationContext），会解析bean定义文件，
+			 * 并解析成BeanDefinition对象放入到spring上下文对象的属性beanDefinitionMap中，如果上下文对象为AnnotationConfigReactiveWebServerApplicationContext，
+			 * 那么它的bean定义解析是在下面的invokeBeanFactoryPostProcessors中执行ConfigurationClassPostProcessor的postProcessBeanDefinitionRegistry方法中。
 			 */
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
@@ -657,7 +660,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
-		//解析bean定义，解析成BeanDefinition对象并放入spring上下文对象的属性beanDefinitionMap中
+		/**
+		 * 如果上下文对象是AbstractRefreshableApplicationContext的子类（比如AnnotationConfigWebApplicationContext，
+		 * ClassPathXmlApplicationContext，还有XmlWebApplicationContext），就会解析bean定义，
+		 * 解析成BeanDefinition对象并放入spring上下文对象的属性beanDefinitionMap中，如果不是AbstractRefreshableApplicationContext
+		 * 的子类，就不会在这里解析bean的定义
+		 */
 		refreshBeanFactory();
 		return getBeanFactory();
 	}

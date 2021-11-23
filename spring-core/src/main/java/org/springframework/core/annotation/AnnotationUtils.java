@@ -2139,6 +2139,7 @@ public abstract class AnnotationUtils {
 		 * @return an alias descriptor, or {@code null} if the attribute
 		 * is not annotated with {@code @AliasFor}
 		 * @see #validateAgainst
+		 * 处理注解@AliasFor的原理
 		 */
 		@Nullable
 		public static AliasDescriptor from(Method attribute) {

@@ -104,6 +104,9 @@ public final class WebHttpHandlerBuilder {
 	 */
 	private WebHttpHandlerBuilder(WebHandler webHandler, @Nullable ApplicationContext applicationContext) {
 		Assert.notNull(webHandler, "WebHandler must not be null");
+		/**
+		 * 这里将DispatcherHandler实例赋值给this.webHandler
+		 */
 		this.webHandler = webHandler;
 		this.applicationContext = applicationContext;
 	}
@@ -153,8 +156,10 @@ public final class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
-		//这里获取到的WebHandler类型的bean为通过@EnableWebFlux解析配置类WebFluxConfigurationSupport中创建的DispatcherHandler实例(属于WebHandler子类)
-		//封装到WebHttpHandlerBuilder中
+		/**
+		 * 这里获取到的WebHandler类型的bean为通过@EnableWebFlux解析配置类WebFluxConfigurationSupport中创建的DispatcherHandler实例(属于WebHandler子类)
+		 * 调用WebHttpHandlerBuilder的构造方法，将DispatcherHandler实例赋值给WebHttpHandlerBuilder的属性webHandler
+		 */
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
@@ -360,11 +365,15 @@ public final class WebHttpHandlerBuilder {
 	 */
 	public HttpHandler build() {
 
-		//this.webHandler为通过@EnableWebFlux注入的DispatcherHandler实例
+		/**
+		 * this.webHandler为通过@EnableWebFlux注入的DispatcherHandler实例
+		 * 会将它赋值给DefaultWebFilterChain的属性handler
+		 */
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
+		//生成ExceptionHandlingWebHandler实例，包装了FilteringWebHandler实例（又包装了DispatcherHandler实例）
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
-		//创建HttpWebHandlerAdapter对象，封装DispatcherHandler实例，并返回
+		//创建HttpWebHandlerAdapter对象，包装ExceptionHandlingWebHandler实例（里面的FilteringWebHandler对象封装DispatcherHandler实例），并返回
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);
 		if (this.sessionManager != null) {
 			adapted.setSessionManager(this.sessionManager);

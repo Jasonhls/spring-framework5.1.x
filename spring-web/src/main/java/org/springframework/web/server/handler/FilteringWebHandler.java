@@ -42,6 +42,9 @@ public class FilteringWebHandler extends WebHandlerDecorator {
 	 */
 	public FilteringWebHandler(WebHandler handler, List<WebFilter> filters) {
 		super(handler);
+		/**
+		 * 将通过@EnableWebFlux注入的DispatcherHandler实例赋值给DefaultWebFilterChain的属性handler
+		 */
 		this.chain = new DefaultWebFilterChain(handler, filters);
 	}
 
@@ -56,6 +59,10 @@ public class FilteringWebHandler extends WebHandlerDecorator {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
+		/**
+		 * 处理Http请求的核心方法，这里的chain为当前类的构造方法中创建的DefaultWebFilterChain对象，
+		 * 该对象中的属性handler为DispatcherHandler对象
+		 */
 		return this.chain.filter(exchange);
 	}
 

@@ -58,6 +58,9 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
 		Mono<Void> completion;
 		try {
+			/**
+			 * 处理Http请求的核心方法，super为WebHandlerDecorator对象
+			 */
 			completion = super.handle(exchange);
 		}
 		catch (Throwable ex) {

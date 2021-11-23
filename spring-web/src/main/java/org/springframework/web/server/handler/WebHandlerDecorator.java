@@ -46,6 +46,9 @@ public class WebHandlerDecorator implements WebHandler {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
+		/**
+		 * 处理Http请求的核心方法，this.delegate为FilteringWebHandler对象
+		 */
 		return this.delegate.handle(exchange);
 	}
 
