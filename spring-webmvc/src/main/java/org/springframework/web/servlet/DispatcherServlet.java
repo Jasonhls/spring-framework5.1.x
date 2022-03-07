@@ -1094,8 +1094,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				// Actually invoke the handler.
 				/**
 				 * 通过适配器真正调用目标方法，并返回视图
-				 * RequestMappingHandlerAdapter#handleInternal
 				 * AbstractHandlerMethodAdapter#handle(HttpServletRequest request, HttpServletResponse response, Object handler)
+				 * RequestMappingHandlerAdapter#handleInternal
 				 */
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 

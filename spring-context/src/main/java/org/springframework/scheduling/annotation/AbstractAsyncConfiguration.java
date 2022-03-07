@@ -74,6 +74,9 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 			throw new IllegalStateException("Only one AsyncConfigurer may exist");
 		}
 		AsyncConfigurer configurer = configurers.iterator().next();
+		/**
+		 * 这里返回自定义的线程池
+		 */
 		this.executor = configurer::getAsyncExecutor;
 		this.exceptionHandler = configurer::getAsyncUncaughtExceptionHandler;
 	}

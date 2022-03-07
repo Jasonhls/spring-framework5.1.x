@@ -37,6 +37,7 @@ final class ScopedProxyCreator {
 	public static BeanDefinitionHolder createScopedProxy(
 			BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry, boolean proxyTargetClass) {
 
+		//生成被注解@Scope注释的bean的BeanDefinition
 		return ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
 	}
 
