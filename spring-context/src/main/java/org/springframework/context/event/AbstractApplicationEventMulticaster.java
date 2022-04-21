@@ -240,6 +240,7 @@ public abstract class AbstractApplicationEventMulticaster
 				try {
 					Class<?> listenerType = beanFactory.getType(listenerBeanName);
 					if (listenerType == null || supportsEvent(listenerType, eventType)) {
+						//返回所有的ApplicationListener类型的Bean实例
 						ApplicationListener<?> listener =
 								beanFactory.getBean(listenerBeanName, ApplicationListener.class);
 						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
