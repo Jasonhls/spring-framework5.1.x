@@ -72,6 +72,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	@Override
 	protected final ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
+		//无参构造方法中会把拦截器集合赋值给内部类InterceptingRequestExecution的属性iterator
 		InterceptingRequestExecution requestExecution = new InterceptingRequestExecution();
 		return requestExecution.execute(this, bufferedOutput);
 	}
@@ -87,6 +88,9 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 		@Override
 		public ClientHttpResponse execute(HttpRequest request, byte[] body) throws IOException {
+			/**
+			 * 遍历执行拦截器
+			 */
 			if (this.iterator.hasNext()) {
 				ClientHttpRequestInterceptor nextInterceptor = this.iterator.next();
 				return nextInterceptor.intercept(request, body, this);

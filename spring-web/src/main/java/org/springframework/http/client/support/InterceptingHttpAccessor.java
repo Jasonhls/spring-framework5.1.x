@@ -55,6 +55,7 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 	 * once the {@link ClientHttpRequestFactory} will be built.
 	 * @see #getRequestFactory()
 	 * @see AnnotationAwareOrderComparator
+	 * 设置拦截器
 	 */
 	public void setInterceptors(List<ClientHttpRequestInterceptor> interceptors) {
 		// Take getInterceptors() List as-is when passed in here
@@ -89,6 +90,7 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 	 */
 	@Override
 	public ClientHttpRequestFactory getRequestFactory() {
+		//获取拦截器集合
 		List<ClientHttpRequestInterceptor> interceptors = getInterceptors();
 		if (!CollectionUtils.isEmpty(interceptors)) {
 			ClientHttpRequestFactory factory = this.interceptingRequestFactory;
