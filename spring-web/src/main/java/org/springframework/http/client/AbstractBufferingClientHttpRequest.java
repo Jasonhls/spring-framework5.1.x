@@ -45,6 +45,7 @@ abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequ
 		if (headers.getContentLength() < 0) {
 			headers.setContentLength(bytes.length);
 		}
+		//执行到InterceptingClientHttpRequest的executeInternal方法
 		ClientHttpResponse result = executeInternal(headers, bytes);
 		this.bufferedOutput = new ByteArrayOutputStream(0);
 		return result;
