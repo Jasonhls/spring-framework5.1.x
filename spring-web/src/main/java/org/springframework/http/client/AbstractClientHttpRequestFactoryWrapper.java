@@ -40,6 +40,7 @@ public abstract class AbstractClientHttpRequestFactoryWrapper implements ClientH
 	 */
 	protected AbstractClientHttpRequestFactoryWrapper(ClientHttpRequestFactory requestFactory) {
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
+		//这里的requestFactory为SimpleClientHttpRequestFactory对象
 		this.requestFactory = requestFactory;
 	}
 
@@ -51,6 +52,7 @@ public abstract class AbstractClientHttpRequestFactoryWrapper implements ClientH
 	 */
 	@Override
 	public final ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		//这里会创建InterceptingClientHttpRequest对象并返回
 		return createRequest(uri, httpMethod, this.requestFactory);
 	}
 

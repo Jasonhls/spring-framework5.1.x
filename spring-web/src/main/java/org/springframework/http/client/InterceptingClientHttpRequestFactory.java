@@ -45,6 +45,7 @@ public class InterceptingClientHttpRequestFactory extends AbstractClientHttpRequ
 	public InterceptingClientHttpRequestFactory(ClientHttpRequestFactory requestFactory,
 			@Nullable List<ClientHttpRequestInterceptor> interceptors) {
 
+		//这里的requestFactory为SimpleClientHttpRequestFactory对象
 		super(requestFactory);
 		this.interceptors = (interceptors != null ? interceptors : Collections.emptyList());
 	}
@@ -52,6 +53,7 @@ public class InterceptingClientHttpRequestFactory extends AbstractClientHttpRequ
 
 	@Override
 	protected ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod, ClientHttpRequestFactory requestFactory) {
+		//这里传入的requestFactory为SimpleClientHttpRequestFactory对象
 		return new InterceptingClientHttpRequest(requestFactory, this.interceptors, uri, httpMethod);
 	}
 

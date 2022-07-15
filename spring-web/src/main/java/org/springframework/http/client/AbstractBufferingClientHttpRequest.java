@@ -45,7 +45,21 @@ abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequ
 		if (headers.getContentLength() < 0) {
 			headers.setContentLength(bytes.length);
 		}
-		//执行到InterceptingClientHttpRequest的executeInternal方法
+		/**
+		 * 如果this为InterceptingClientHttpRequest对象，就执行它的executeInternal方法
+		 * 执行InterceptingRequestExecution的execute方法，然后执行下一个AbstractBufferingClientHttpRequest对象，
+		 * 即SimpleBufferingClientHttpRequest，执行executeInternal方法，最后通过HttpURLConnection发起http请求
+		 *
+		 * 1.默认情况下：RestTemplate底层通过SimpleClientHttpRequestFactory对象创建HttpURLConnection发起远程调用，
+		 * 2.spring提供了多种对HTTP客户端库的支持：
+		 *   HttpComponentsClientHttpRequestFactory使用Apache Http Client
+		 *   比如：
+		 *     @Bean
+		 *     public RestTemplate restTemplate() {
+		 *         return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		 *     }
+		 *   OkHttp3ClientHttpRequestFactory使用okhttp3 OkHttpClient
+		 */
 		ClientHttpResponse result = executeInternal(headers, bytes);
 		this.bufferedOutput = new ByteArrayOutputStream(0);
 		return result;

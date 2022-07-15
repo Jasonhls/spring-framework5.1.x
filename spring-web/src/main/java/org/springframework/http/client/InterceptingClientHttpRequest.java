@@ -47,7 +47,9 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	protected InterceptingClientHttpRequest(ClientHttpRequestFactory requestFactory,
 			List<ClientHttpRequestInterceptor> interceptors, URI uri, HttpMethod method) {
-
+		//在RestTemplate的doExecute方法中会调用createRequest方法，然后调用其父类HttpAccessor的createRequest方法，
+		//该方法中getRequestFactory().createRequest()方法中，会创建InterceptingClientHttpRequest对象，并把InterceptingClientHttpRequestFactory的
+		//父类AbstractClientHttpRequestFactoryWrapper的属性requestFactory（为SimpleClientHttpRequestFactory）传过来
 		this.requestFactory = requestFactory;
 		this.interceptors = interceptors;
 		this.method = method;
@@ -98,6 +100,11 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 			else {
 				HttpMethod method = request.getMethod();
 				Assert.state(method != null, "No standard HTTP method");
+				/**
+				 * 在LoadBalancerInterceptor的intercept方法中，在创建LoaderBalancerRequest的过程中，request为ServiceRequestWrapper
+				 * 这里的requestFactory为SimpleClientHttpRequestFactory对象
+				 * 返回的delegate为SimpleBufferingClientHttpRequest
+				 */
 				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), method);
 				request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
 				if (body.length > 0) {
@@ -109,6 +116,11 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 						StreamUtils.copy(body, delegate.getBody());
 					}
 				}
+				/**
+				 * delegate为SimpleBufferingClientHttpRequest对象
+				 * 执行父类AbstractClientHttpRequest的execute方法
+				 * 最后通过HttpURLConnection发起http请求的
+				 */
 				return delegate.execute();
 			}
 		}

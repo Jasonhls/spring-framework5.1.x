@@ -95,6 +95,8 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 		if (!CollectionUtils.isEmpty(interceptors)) {
 			ClientHttpRequestFactory factory = this.interceptingRequestFactory;
 			if (factory == null) {
+				//创建InterceptingClientHttpRequestFactory对象，这里传进来的入参ClientHttpRequestFactory类型是SimpleClientHttpRequestFactory对象，
+				//把它传给父类AbstractClientHttpRequestFactoryWrapper的属性requestFactory
 				factory = new InterceptingClientHttpRequestFactory(super.getRequestFactory(), interceptors);
 				this.interceptingRequestFactory = factory;
 			}

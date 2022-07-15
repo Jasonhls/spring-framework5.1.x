@@ -85,8 +85,8 @@ public abstract class HttpAccessor {
 	 */
 	protected ClientHttpRequest createRequest(URI url, HttpMethod method) throws IOException {
 		/**
-		 * 这里返回的是InterceptingClientHttpRequestFactory，然后执行它的createRequest方法，返回的是
-		 * InterceptingClientHttpRequest对象
+		 * 这里getRequestFactory()方法返回的是InterceptingClientHttpRequestFactory对象，
+		 * 然后执行它的createRequest方法，返回的是InterceptingClientHttpRequest对象
 		 */
 		ClientHttpRequest request = getRequestFactory().createRequest(url, method);
 		if (logger.isDebugEnabled()) {

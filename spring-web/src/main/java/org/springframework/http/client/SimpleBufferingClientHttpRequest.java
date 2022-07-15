@@ -73,6 +73,7 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 		if (this.connection.getDoOutput() && this.outputStreaming) {
 			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
 		}
+		//通过HttpURLConnection发起http请求的
 		this.connection.connect();
 		if (this.connection.getDoOutput()) {
 			FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
