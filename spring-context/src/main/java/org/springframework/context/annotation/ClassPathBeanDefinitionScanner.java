@@ -163,6 +163,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		this.registry = registry;
 
 		if (useDefaultFilters) {
+			/**
+			 * 会把Component.class添加到父类ClassPathScanningCandidateComponent的属性includeFilters中
+			 */
 			registerDefaultFilters();
 		}
 		setEnvironment(environment);
@@ -272,7 +275,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
-			//找出扫描包中的Component，获取BeanDefinition集合，这些是需要注册到spring容器中的
+			/**
+			 * 会处理被注解@Component注解注释(包括@Controller,@Service,@Repository注释的，因为这些注解都包含@Component这个注解)的bean定义
+			 * 获取BeanDefinition集合，这些是需要注册到spring容器中的
+			 */
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);

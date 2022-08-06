@@ -59,6 +59,10 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 
 		// This method optimizes avoiding unnecessary creation of ClassReaders
 		// as well as visiting over those readers.
+		/**
+		 * matchSelf方法中会判断当前bean是否有被注解@Component注释(包括@Controller,@Service,@Repository注释的，因为这些注解都包含@Component这个注解)
+		 * this为AnnotationTypeFilter
+		 */
 		if (matchSelf(metadataReader)) {
 			return true;
 		}

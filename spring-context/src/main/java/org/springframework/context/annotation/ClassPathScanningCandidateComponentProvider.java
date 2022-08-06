@@ -203,6 +203,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
+		/**
+		 * 把Component.class添加到ClassPathScanningCandidateComponentProvider的属性includeFilters中
+		 */
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
@@ -312,7 +315,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
-			//解析Component
+			/**
+			 * 会处理被注解@Component注解注释(包括@Controller,@Service,@Repository注释的，因为这些注解都包含@Component这个注解)的bean定义
+			 */
 			return scanCandidateComponents(basePackage);
 		}
 	}
@@ -429,9 +434,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 					try {
 						//getMetadataReaderFactory()获取的是CachingMetadataReaderFactory对象
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
-						//执行前面添加到ClassPathBeanDefinitionScanner对象的属性includeFilters和excludeFilters中的过滤器
+						/**
+						 * 会处理被注解@Component注解注释(包括@Controller,@Service,@Repository注释的，因为这些注解都包含@Component这个注解)的bean定义
+						 * 执行前面添加到ClassPathBeanDefinitionScanner对象的属性includeFilters和excludeFilters中的过滤器
+						 */
 						if (isCandidateComponent(metadataReader)) {
-							//如果满足是一个Component的条件，就封装为ScannedGenericBeanDefinition对象，所以包扫描的带有@Component注解的类，都会被创建成一个ScannedGenericBeanDefinition对象
+							/**
+							 * 如果满足是一个Component的条件，就封装为ScannedGenericBeanDefinition对象，所以包扫描的带有@Component注解的类，都会被创建成一个ScannedGenericBeanDefinition对象
+							 */
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setResource(resource);
 							sbd.setSource(resource);
@@ -492,6 +502,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
 		for (TypeFilter tf : this.excludeFilters) {
+			/**
+			 * match会去判断是否有@Component注解(包括@Controller,@Service,@Repository注释的，因为这些注解都包含@Component这个注解)
+			 */
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
 				return false;
 			}
