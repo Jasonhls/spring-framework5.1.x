@@ -318,6 +318,7 @@ public class ContextLoader {
 			/**
 			 * 把spring上下文保存到 应用上下文对象中
 			 * 方便在Spring Web 上下文对象实例化过程会从servletContext取出来
+			 * 后面通过WebApplicationContextUtils.getWebApplicationContext(getServletContext())就能获取到父容器
 			 */
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
@@ -388,6 +389,7 @@ public class ContextLoader {
 		}
 		else {
 			/**
+			 * 在spring-web项目的resources目录下有ContextLoader.properties这个文件
 			 * 将配置文件中默认的WebApplicationContext赋值给contextClassName，即org.springframework.web.context.support.XmlWebApplicationContext
 			 */
 			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());

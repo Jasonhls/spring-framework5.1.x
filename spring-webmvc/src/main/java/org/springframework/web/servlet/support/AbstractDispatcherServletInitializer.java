@@ -60,6 +60,9 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
+		/**
+		 * 创建父容器（即根容器）
+		 */
 		//1.创建我们的根容器AnnotationConfigWebApplicationContext，此时根容器是空容器对象，没有组件
 		//2.new 了ContextLoaderListener
 		//3.把我们的根配置类保存到根容器中
@@ -99,6 +102,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 
 		/**
 		 * 创建DispatcherServlet对象，tomcat会对DispatcherServlet进行生命周期管理
+		 * 会把上一步创建的子容器赋值给DispatcherServlet的父类FrameworkServlet的属性webApplicationContext
 		 */
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
