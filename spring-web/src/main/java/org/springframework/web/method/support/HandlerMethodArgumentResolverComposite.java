@@ -139,6 +139,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
 			for (HandlerMethodArgumentResolver resolver : this.argumentResolvers) {
+				/**
+				 * 如果resolver是RequestResponseBodyMethodProcessor对象，那么判断是否方法上是否含有@RequestResponseBodyMethodProcessor注解
+				 */
 				if (resolver.supportsParameter(parameter)) {
 					result = resolver;
 					this.argumentResolverCache.put(parameter, result);

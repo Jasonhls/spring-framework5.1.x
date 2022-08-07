@@ -104,7 +104,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		/**
 		 * 对找到的异常处理方法进行反射，执行异常处理方法，得到异常处理方法返回的返回值
-		 * 这里是解析入参的核心逻辑
+		 * 这里是使用ServletInvocableHandlerMethod的父类属性resolvers（即入参处理器集合）来解析入参的核心逻辑
 		 */
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
 		setResponseStatus(webRequest);

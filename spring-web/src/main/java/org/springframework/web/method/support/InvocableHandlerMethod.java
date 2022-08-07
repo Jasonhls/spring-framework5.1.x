@@ -131,7 +131,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 		/**
-		 * 解析入参的核心逻辑
+		 * 使用入参处理器集合，解析入参的核心逻辑
 		 */
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
@@ -162,12 +162,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (args[i] != null) {
 				continue;
 			}
+			/**
+			 * 判断入参处理器是否支持解析入参，如果是RequestResponseBodyMethodProcessor，会去判断方法上是否含有@RequestBody注解
+			 */
 			if (!this.resolvers.supportsParameter(parameter)) {
 				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
 			try {
 				/**
-				 * 解析入参核心逻辑
+				 * 使用入参处理器集合，解析入参核心逻辑
 				 */
 				args[i] = this.resolvers.resolveArgument(parameter, mavContainer, request, this.dataBinderFactory);
 			}
