@@ -76,6 +76,7 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 		 * 执行parser的parse方法
 		 * 如果这里是AspectJAutoProxyBeanDefinitionParser对象，就会执行该类的parse方法
 		 * 如果这里是解析<tx:advice>标签，那么这里的parser就是TxAdviceBeanDefinitionParser对象，如果没有parse方法，就去父类找该方法
+		 * 如果这里是ComponentScanBeanDefinitionParser，则用来解析@Component包括@Controller,@Service,@Repository注释的，因为这些注解都包含@Component这个注解注解的bean
 		 */
 		return (parser != null ? parser.parse(element, parserContext) : null);
 	}

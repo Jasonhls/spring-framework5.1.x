@@ -216,8 +216,11 @@ class ConfigurationClassParser {
 
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
-		//shouldSkip方法中判断@Conditional注解中的条件，
-		// 如果没有@Conditional注解，继续，如果有@Conditional注解，并且满足条件，才会继续，否则这里返回
+		/**
+		 * shouldSkip方法中判断@Conditional注解中的条件，
+		 * 如果没有@Conditional注解，继续，如果有@Conditional注解，会执行注解@Conditional的matches方法，
+		 * 并且满足条件，才会继续，否则这里返回
+		 */
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
