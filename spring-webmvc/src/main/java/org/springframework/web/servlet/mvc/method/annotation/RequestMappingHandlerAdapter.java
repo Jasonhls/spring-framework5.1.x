@@ -588,8 +588,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			this.initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
 		}
 		if (this.returnValueHandlers == null) {
-			//添加默认的HandlerMethodReturnValueHandler，默认的返回值处理器
-			//比如会添加RequestResponseBodyMethodProcessor，处理被注解@ResponseBody标注的方法的返回值的处理
+			/**
+			 * 添加默认的HandlerMethodReturnValueHandler，默认的返回值处理器
+			 * 比如会添加RequestResponseBodyMethodProcessor，处理被注解@ResponseBody标注的方法的返回值的处理
+			 */
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			//创建一个HandlerMethodReturnValueHandlerComposite对象，并往它的属性returnValueHandlers(属于List<HandlerMethodReturnValueHandler>)中添加默认的handlers
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);

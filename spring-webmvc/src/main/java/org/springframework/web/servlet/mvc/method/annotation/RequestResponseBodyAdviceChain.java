@@ -88,7 +88,9 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
 
 		for (RequestBodyAdvice advice : getMatchingAdvice(parameter, RequestBodyAdvice.class)) {
+			//执行RequestBodyAdvice的support方法
 			if (advice.supports(parameter, targetType, converterType)) {
+				//执行RequestBodyAdvice的beforeBodyRead方法
 				request = advice.beforeBodyRead(request, parameter, targetType, converterType);
 			}
 		}

@@ -1453,6 +1453,7 @@ public class BeanDefinitionParserDelegate {
 		/**
 		 *执行自定义的handler的parse方法，也就是解析xml文件中的标签
 		 * 解析数据库事务的标签<tx:advice>，用的handler就是TxNamespaceHandler
+		 * 这里默认为NamespaceHandlerSupport对象
 		 */
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
