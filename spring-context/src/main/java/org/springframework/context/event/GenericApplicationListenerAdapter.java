@@ -61,6 +61,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
+		//这里的delegate为ContextRefreshListener对象
 		this.delegate.onApplicationEvent(event);
 	}
 

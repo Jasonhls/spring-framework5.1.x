@@ -872,7 +872,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		this.refreshEventReceived = true;
 		synchronized (this.onRefreshMonitor) {
-			//会执行DispatcherServlet的onRefresh()方法
+			/**
+			 * 会执行DispatcherServlet的onRefresh()方法
+			 */
 			onRefresh(event.getApplicationContext());
 		}
 	}
@@ -1227,6 +1229,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
+			/**
+			 * 执行FrameworkServlet的onApplicationEvent方法，就执行FrameworkServlet的onRefresh方法了
+			 */
 			FrameworkServlet.this.onApplicationEvent(event);
 		}
 	}

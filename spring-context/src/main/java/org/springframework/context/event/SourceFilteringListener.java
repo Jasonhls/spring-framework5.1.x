@@ -106,6 +106,7 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 			throw new IllegalStateException(
 					"Must specify a delegate object or override the onApplicationEventInternal method");
 		}
+		//这里的delegate为GenericApplicationListenerAdapter
 		this.delegate.onApplicationEvent(event);
 	}
 
