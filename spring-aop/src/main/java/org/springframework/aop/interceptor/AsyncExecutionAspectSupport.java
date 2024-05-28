@@ -164,8 +164,12 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		AsyncTaskExecutor executor = this.executors.get(method);
 		if (executor == null) {
 			Executor targetExecutor;
+			//返回@Async注解的value值
 			String qualifier = getExecutorQualifier(method);
 			if (StringUtils.hasLength(qualifier)) {
+				/**
+				 * 如果@Async注解的value有值（即使用了自定义的线程池来执行异步任务），就根据这个值从spring容器中寻找这个指定的线程池的Bean实例并返回
+				 */
 				targetExecutor = findQualifiedExecutor(this.beanFactory, qualifier);
 			}
 			else {
@@ -287,6 +291,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			return executor.submit(task);
 		}
 		else {
+			//执行异步任务
 			executor.submit(task);
 			return null;
 		}
